@@ -46,25 +46,29 @@ const validationSchema = Yup.object().shape({
   firstname: Yup.string().required("กรุณากรอกชื่อ"),
   lastname: Yup.string().required("กรุณากรอกนามสกุล"),
   sex: Yup.string().required("กรุณาเลือกเพศ"),
-  age: Yup.number()
+  age: Yup.string()
     .required("กรุณากรอกอายุ")
     .min(1, "อายุต้องมากกว่า 0")
     .max(150, "อายุต้องไม่เกิน 150 ปี"),
   birthday_date: Yup.date().required("กรุณากรอกวัน/เดือน/ปีเกิด").nullable(),
-  num_of_house: Yup.number().required("กรุณากรอกที่อยู่บ้านเลขที่"),
+  num_of_house: Yup.string().required("กรุณากรอกที่อยู่บ้านเลขที่"),
   group_of_house: Yup.string().required("กรุณากรอกหมู่ที่"),
   alley_of_house: Yup.string().required("กรุณากรอกตรอก/ซอย"),
   street_of_house: Yup.string().required("กรุณากรอกถนน"),
   tambon: Yup.string().required("กรุณากรอกตำบล"),
   amphoe: Yup.string().required("กรุณากรอกอำเภอ"),
   province: Yup.string().required("กรุณากรอกจังหวัด"),
-  postcode: Yup.number()
+  postcode: Yup.string()
     .required("กรุณากรอกรหัสไปรษณีย์")
-    .min(10000, "รหัสไปรษณีย์ต้องมี 5 หลัก")
-    .max(99999, "รหัสไปรษณีย์ต้องมี 5 หลัก"),
-  phone: Yup.string()
-    .required("กรุณากรอกหมายเลขโทรศัพท์")
-    .matches(/^[0-9]{10}$/, "หมายเลขโทรศัพท์ต้องมี 10 หลัก"),
+    .length(5, "รหัสไปรษณีย์ต้องมี 5 หลัก")
+    .matches(
+      /^\d{5}$/,
+      "กรุณากรอกเป็นตัวเลขเท่านั้น,รหัสไปรษณีย์ต้องมี  5 หลัก"
+    ),
+    phone: Yup.string()
+    .required("กรุณากรอก เบอร์โทร")
+    .length(10, "รหัสไปรษณีย์ต้องมี 10 หลัก")
+    .matches(/^\d{10}$/, "กรุณากรอกเป็นตัวเลขเท่านั้น,เบอร์โทรต้องมี 10 หลัก"),
   email: Yup.string().required("กรุณากรอกอีเมล").email("อีเมลไม่ถูกต้อง"),
   line_id: Yup.string().required("กรุณากรอก Line ID"),
   education_level: Yup.string().required("กรุณาเลือกระดับการศึกษา"),
@@ -241,9 +245,17 @@ const dataselect = [
     name: "operating_area",
     options: [
       { value: "", label: "พื้นที่ปฏิบัติงาน" },
-      { value: "พื้นที่ 1", label: "พื้นที่ 1" },
-      { value: "พื้นที่ 2", label: "พื้นที่ 2" },
-      { value: "พื้นที่ 3", label: "พื้นที่ 3" },
+      { value: "หมู่ที่ 1 บ้านหลวง", label: "หมู่ที่ 1 บ้านหลวง" },
+      { value: "หมู่ที่ 2 บ้านแพทย์", label: "หมู่ที่ 2 บ้านแพทย์" },
+      { value: "หมู่ที่ 2 บ้านปงสนุก", label: "หมู่ที่ 2 บ้านปงสนุก" },
+      { value: "หมู่ที่ 3 บ้านปิน", label: "หมู่ที่ 3 บ้านปิน" },
+      { value: "หมู่ที่ 4 บ้านไชยสถาน", label: "หมู่ที่ 4 บ้านไชยสถาน" },
+      { value: "หมู่ที่ 5 บ้านท่าม่าน", label: "หมู่ที่ 5 บ้านท่าม่าน" },
+      { value: "หมู่ที่ 6 บ้านหล่ายทุ่ง", label: "หมู่ที่ 6 บ้านหล่ายทุ่ง" },
+      { value: "หมู่ที่ 7 บ้านสบทราย", label: "หมู่ที่ 7 บ้านสบทราย" },
+      { value: "หมู่ที่ 8 บ้านใหม่", label: "หมู่ที่ 8 บ้านใหม่" },
+      { value: "หมู่ที่ 9 บ้านกลาง", label: "หมู่ที่ 9 บ้านกลาง" },
+      { value: "หมู่ที่ 10 บ้านป่าซางคำ", label: "หมู่ที่ 10 บ้านป่าซางคำ" },
     ],
   },
 ];
@@ -287,6 +299,38 @@ const Create: React.FC = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const handleChangeL = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // อัปเดตข้อมูลฟอร์ม
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+    if (name === "birthday_date") {
+      const birthday = new Date(value);
+      const today = new Date();
+
+      // คำนวณอายุด้วยปีค.ศ.
+      let age = today.getFullYear() - birthday.getFullYear();
+
+      // ตรวจสอบอายุที่คำนวณได้
+      if (
+        today.getMonth() < birthday.getMonth() ||
+        (today.getMonth() === birthday.getMonth() &&
+          today.getDate() < birthday.getDate())
+      ) {
+        age--;
+      }
+
+      // อัปเดตอายุที่คำนวณได้
+      setFormData((prevData) => ({
+        ...prevData,
+        age: isNaN(age) || age < 1 ? "" : age.toString(), // ใส่ค่าอายุที่คำนวณได้
+      }));
+    }
   };
 
   const handleSubmit = async (event: FormEvent) => {
@@ -406,9 +450,9 @@ const Create: React.FC = () => {
                 <Typography>
                   <form onSubmit={handleSubmit} className="p-2">
                     {data
-                      .filter((field) => parseInt(field.id) <= 3)
+                      .filter((field) => parseInt(field.id) === 1)
                       .map((item) => (
-                        <div  className="p-2" key={item.id}>
+                        <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
                           <span className="text-red-500 absolute">*</span>
                           <input
@@ -419,9 +463,54 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
+                    <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                        {data
+                          .filter((field) => parseInt(field.id) === 2)
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <input
+                                type={item.type}
+                                name={item.name}
+                                placeholder={item.placeholder}
+                                value={formData[item.name as keyof FormData]}
+                                onChange={handleChange}
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              />
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
+                        {data
+                          .filter((field) => parseInt(field.id) === 3)
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <input
+                                type={item.type}
+                                name={item.name}
+                                placeholder={item.placeholder}
+                                value={formData[item.name as keyof FormData]}
+                                onChange={handleChange}
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              />
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+
                     {dataselect
                       .filter((fieldSelect) => parseInt(fieldSelect.id) === 1)
                       .map((item) => (
@@ -440,7 +529,7 @@ const Create: React.FC = () => {
                               </option>
                             ))}
                           </select>
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
                     {data
@@ -457,11 +546,110 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
+                    <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                        {data
+                          .filter((field) => parseInt(field.id) === 4)
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <input
+                                type={item.type}
+                                name={item.name}
+                                placeholder={item.placeholder}
+                                value={formData[item.name as keyof FormData]}
+                                onChange={handleChangeL}
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              />
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
+                        {data
+                          .filter((field) => parseInt(field.id) === 5)
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <input
+                                type={item.type}
+                                name={item.name}
+                                placeholder={item.placeholder}
+                                value={formData[item.name as keyof FormData]}
+                                
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              />
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                        {data
+                          .filter((field) => parseInt(field.id) === 6)
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <input
+                                type={item.type}
+                                name={item.name}
+                                placeholder={item.placeholder}
+                                value={formData[item.name as keyof FormData]}
+                                onChange={handleChange}
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              />
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
+                        {dataselect
+                          .filter(
+                            (fieldSelect) => parseInt(fieldSelect.id) === 2
+                          )
+                          .map((item) => (
+                            <div className="p-2" key={item.id}>
+                              <label>{item.names}</label>
+                              <span className="text-red-500 absolute">*</span>
+                              <select
+                                name={item.name}
+                                value={formData[item.name as keyof FormData]}
+                                onChange={handleChange}
+                                className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                              >
+                                {item.options.map((option) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              {errors[item.name] && (
+                                <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:space-x-4">
+                    <div className="w-full md:w-1/2">
                     {data
-                      .filter((field) => parseInt(field.id) === 4)
+                       .filter((field) => parseInt(field.id) === 7)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -474,11 +662,13 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
-                    {data
-                      .filter((field) => parseInt(field.id) === 5)
+                      </div>
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 8)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -491,11 +681,15 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
-                    {data
-                      .filter((field) => parseInt(field.id) === 6)
+                      </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 9)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -508,35 +702,13 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
-                    {dataselect
-                      .filter((fieldSelect) => parseInt(fieldSelect.id) === 2)
-                      .map((item) => (
-                        <div className="p-2" key={item.id}>
-                          <label>{item.names}</label>
-                          <span className="text-red-500 absolute">*</span>
-                          <select
-                            name={item.name}
-                            value={formData[item.name as keyof FormData]}
-                            onChange={handleChange}
-                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
-                          >
-                            {item.options.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
-                        </div>
-                      ))}
-                    {data
-                      .filter(
-                        (field) =>
-                          parseInt(field.id) >= 7 && parseInt(field.id) <= 14
-                      )
+                      </div>
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 10)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -549,9 +721,93 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
+                      </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 11)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <input
+                            type={item.type}
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          />
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 12)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <input
+                            type={item.type}
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          />
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 13)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <input
+                            type={item.type}
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          />
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
+                      {data
+                       .filter((field) => parseInt(field.id) === 14)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <input
+                            type={item.type}
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          />
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
                     {dataselect
                       .filter((fieldSelect) => parseInt(fieldSelect.id) === 3)
                       .map((item) => (
@@ -570,14 +826,13 @@ const Create: React.FC = () => {
                               </option>
                             ))}
                           </select>
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
                     {data
-                      .filter(
-                        (field) =>
-                          parseInt(field.id) >= 15 && parseInt(field.id) <= 16
-                      )
+                      .filter((field) => parseInt(field.id) === 15)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -590,15 +845,34 @@ const Create: React.FC = () => {
                             onChange={handleChange}
                             className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
                           />
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
+                      </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="w-full md:w-1/2">
+                      {data
+                      .filter((field) => parseInt(field.id) === 16)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <input
+                            type={item.type}
+                            name={item.name}
+                            placeholder={item.placeholder}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          />
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      <div className="w-full md:w-1/2">
                     {dataselect
-                      .filter(
-                        (fieldSelect) =>
-                          parseInt(fieldSelect.id) >= 4 &&
-                          parseInt(fieldSelect.id) <= 5
-                      )
+                      .filter((fieldSelect) => parseInt(fieldSelect.id) === 4)
                       .map((item) => (
                         <div className="p-2" key={item.id}>
                           <label>{item.names}</label>
@@ -615,7 +889,30 @@ const Create: React.FC = () => {
                               </option>
                             ))}
                           </select>
-                          {errors[item.name] && <div>{errors[item.name]}</div>}
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
+                        </div>
+                      ))}
+                      </div>
+                      </div>
+                    {dataselect
+                      .filter((fieldSelect) => parseInt(fieldSelect.id) === 5)
+                      .map((item) => (
+                        <div className="p-2" key={item.id}>
+                          <label>{item.names}</label>
+                          <span className="text-red-500 absolute">*</span>
+                          <select
+                            name={item.name}
+                            value={formData[item.name as keyof FormData]}
+                            onChange={handleChange}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          >
+                            {item.options.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors[item.name] && <div className="text-red-500 text-sm mt-1">{errors[item.name]}</div>}
                         </div>
                       ))}
                   </form>
