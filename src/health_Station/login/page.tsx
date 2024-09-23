@@ -43,11 +43,7 @@ const Login: React.FC = () => {
       console.log(response);
       window.localStorage.setItem("token", response.data.token);
       window.localStorage.setItem("username", userInput.username);
-      if(response.data.role === "ADMIN"){
-        window.location.href = "/admin";
-      }else {
-        window.location.href = "/health_Station";
-      }
+      window.location.href = "/health_Station";
     } catch (error: any) {
       if (error.response && error.response.data) {
         setErrorMessage(error.response.data.message || "การเข้าสู่ระบบล้มเหลว โปรดลองอีกครั้ง");
@@ -61,8 +57,8 @@ const Login: React.FC = () => {
     <div className="h-screen">
       <div className="md:flex md:flex-row p-2">
         <div className="md:flex-1 md:flex md:justify-center md:items-center">
-          <div className="place-content-center p-4">
-            <div className="text-4xl  mt-14 mb-5 md:mt-5">เข้าสู่ระบบ</div>
+          <div className="place-content-center">
+            <div className="text-4xl m-2 mt-32 mb-5 md:mt-5">เข้าสู่ระบบ</div>
             <div className="mt-16">
               <label htmlFor="username">
                 ชื่อผู้ใช้งาน
@@ -70,7 +66,7 @@ const Login: React.FC = () => {
                   <img
                     src={imageToAddUser}
                     alt="User"
-                    className="w-6 h-6 object-cover rounded-full "
+                    className="w-6 h-6 object-cover rounded-full mt-2"
                   />
                   <input
                     id="username"
@@ -85,8 +81,7 @@ const Login: React.FC = () => {
             <div className="mt-10">
               <label htmlFor="password">
                 รหัสผ่าน
-                <div className="grid grid-cols-2 border-b-2">
-                  <div className="flex">
+                <div className="flex flex-row items-center border-b-2">
                   <img
                     src={imageToAddLock}
                     alt="Lock"
@@ -100,9 +95,8 @@ const Login: React.FC = () => {
                     onChange={setPassword}
                     value={userInput.password}
                   />
-                  </div>
                   <button
-                    className="grid justify-items-end"
+                    className="focus:outline-none ml-20 md:ml-32"
                     type="button"
                     onClick={togglePasswordVisibility}
                   >
@@ -123,15 +117,15 @@ const Login: React.FC = () => {
                 </div>
               </label>
             </div>
-            {/* <div className="mt-2">
+            <div className="mt-2">
               <label className="flex items-center">
                 <span className="ml-2 mt-5 mb-5 text-sm text-gray-600">
                   Remember me
                 </span>
               </label>
-            </div> */}
-            <div className="md:w-full text-center bg-blue-500 rounded-full py-3 mt-28 grid justify-items-center">
-              <button onClick={handleLogin} className="text-white text-xl">
+            </div>
+            <div className="md:w-96 text-center bg-blue-500 rounded-full py-2 px-4 mt-10">
+              <button onClick={handleLogin} className="text-white">
                 Login
               </button>
             </div>
@@ -142,7 +136,7 @@ const Login: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="hidden md:flex-1 rounded-lg justify-center items-center md:block ">
+        <div className="hidden md:flex-1 rounded-lg justify-center items-center md:block">
           <div className="text-white">
             <img
               src={group}
