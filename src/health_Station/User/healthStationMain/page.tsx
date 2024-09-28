@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import {
   List,
@@ -128,6 +128,15 @@ const Health_Station: React.FC = () => {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    
+    navigate('/');
+  };
+
+
   return (
     <div className="h-screen">
       <Navbar />
@@ -160,11 +169,12 @@ const Health_Station: React.FC = () => {
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <Link to="/">
-                <button className="rounded-lg p-2 text-left w-full">
-                  อสม ออกจากระบบ
-                </button>
-              </Link>
+              <button
+          onClick={handleLogout}
+          className="rounded-lg p-2 text-left w-full text-black"
+        >
+          ออกจากระบบ
+        </button>
             </List>
           )}
         </div>

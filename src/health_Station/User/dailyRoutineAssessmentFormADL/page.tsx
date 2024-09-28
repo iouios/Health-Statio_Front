@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -90,6 +90,14 @@ const PhysicalStandardValues: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedOption, setSelectedOption] = useState<string>('');
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -179,7 +187,7 @@ const PhysicalStandardValues: React.FC = () => {
                           บันทึกข้อมูลใหม่
                         </button>
                       </Link>
-                      <Link to="">
+                      <Link to="/health_Station/elderly">
                         <button className="rounded-lg p-2 text-left w-full">
                           บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
                         </button>
@@ -188,11 +196,11 @@ const PhysicalStandardValues: React.FC = () => {
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <Link to="/">
-                <button className="rounded-lg p-2 text-left w-full">
+                <button 
+                onClick={handleLogout}
+                className="rounded-lg p-2 text-left w-full">
                   อสม ออกจากระบบ
                 </button>
-              </Link>
             </List>
           )}
         </div>

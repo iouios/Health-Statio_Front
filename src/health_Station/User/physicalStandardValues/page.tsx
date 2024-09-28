@@ -5,12 +5,8 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {
-  List,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { Link } from "react-router-dom";
+import { List, useMediaQuery, useTheme } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import icon from "../../../assets/icon.png";
 import * as Yup from "yup";
 import axios from "axios";
@@ -33,39 +29,32 @@ interface Errors {
 
 const validationSchema = Yup.object().shape({
   ssd: Yup.string()
-  .matches(/^\d{13}$/, "เลขประจำตัวประชาชนต้องมี 13 หลัก")
-  .required("กรุณากรอก เลขประจำตัวประชาชน ของผู้ดูแล"),
-    
+    .matches(/^\d{13}$/, "เลขประจำตัวประชาชนต้องมี 13 หลัก")
+    .required("กรุณากรอก เลขประจำตัวประชาชน ของผู้ดูแล"),
+
   blood_pressure: Yup.string()
     .required("กรุณากรอกความดันโลหิต")
-    .test(
-      "range-check",
-      "ค่าความดันโลหิตต้องอยู่ในช่วง 50-200",
-      value => value ? (parseInt(value) >= 50 && parseInt(value) <= 200) : true
+    .test("range-check", "ค่าความดันโลหิตต้องอยู่ในช่วง 50-200", (value) =>
+      value ? parseInt(value) >= 50 && parseInt(value) <= 200 : true
     ),
   weight: Yup.string()
     .required("กรุณากรอกน้ำหนัก")
     .test(
       "weight-check",
       "น้ำหนักต้องมากกว่า 0 และน้อยกว่า 300 กิโลกรัม",
-      value => value ? (parseInt(value) > 0 && parseInt(value) < 300) : true
+      (value) => (value ? parseInt(value) > 0 && parseInt(value) < 300 : true)
     ),
   height: Yup.string()
     .required("กรุณากรอกส่วนสูง")
-    .test(
-      "height-check",
-      "ส่วนสูงต้องอยู่ในช่วง 30-250 เซนติเมตร",
-      value => value ? (parseInt(value) >= 30 && parseInt(value) <= 250) : true
+    .test("height-check", "ส่วนสูงต้องอยู่ในช่วง 30-250 เซนติเมตร", (value) =>
+      value ? parseInt(value) >= 30 && parseInt(value) <= 250 : true
     ),
   waistline: Yup.string()
     .required("กรุณากรอกรอบเอว")
-    .test(
-      "waistline-check",
-      "รอบเอวต้องอยู่ในช่วง 10-150 นิ้ว",
-      value => value ? (parseInt(value) >= 10 && parseInt(value) <= 150) : true
+    .test("waistline-check", "รอบเอวต้องอยู่ในช่วง 10-150 นิ้ว", (value) =>
+      value ? parseInt(value) >= 10 && parseInt(value) <= 150 : true
     ),
 });
-
 
 const PhysicalStandardValues: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -90,7 +79,6 @@ const PhysicalStandardValues: React.FC = () => {
     });
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -98,13 +86,17 @@ const PhysicalStandardValues: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
-      const response = await axios.post('http://localhost:9999/api/form/healthDataRecords', formData,{
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await axios.post(
+        "http://localhost:9999/api/form/healthDataRecords",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      });
-      if (response.status === 200){
+      );
+      if (response.status === 200) {
         console.log("Form Submitted", formData);
         setErrors({});
         window.location.href = "/health_Station";
@@ -115,7 +107,7 @@ const PhysicalStandardValues: React.FC = () => {
         error.inner.forEach((err) => {
           if (err.path) newErrors[err.path as keyof Errors] = err.message;
         });
-      }else if (axios.isAxiosError(error)) {
+      } else if (axios.isAxiosError(error)) {
         if (error.response) {
           console.error("API error:", error.response.data);
           const apiErrors = error.response.data.errors;
@@ -129,11 +121,19 @@ const PhysicalStandardValues: React.FC = () => {
         } else {
           console.error("API error:", error.message);
         }
-      }else {
+      } else {
         console.error("Unexpected error:", error);
       }
       setErrors(newErrors);
     }
+  };
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
   };
 
   return (
@@ -168,11 +168,12 @@ const PhysicalStandardValues: React.FC = () => {
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <Link to="/">
-                <button className="rounded-lg p-2 text-left w-full">
-                  อสม ออกจากระบบ
-                </button>
-              </Link>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg p-2 text-left w-full text-black"
+              >
+                ออกจากระบบ
+              </button>
             </List>
           )}
         </div>
@@ -209,9 +210,7 @@ const PhysicalStandardValues: React.FC = () => {
                 value={formData.ssd}
               />
               {errors.ssd && (
-                <div className="text-red-500 text-sm mt-1">
-                  {errors.ssd}
-                </div>
+                <div className="text-red-500 text-sm mt-1">{errors.ssd}</div>
               )}
             </div>
             <Accordion className="bg-blue-500 m-2">
@@ -225,86 +224,86 @@ const PhysicalStandardValues: React.FC = () => {
               <AccordionDetails>
                 <Typography>
                   <div className="p-4">
-                      <div className="items-start w-full mt-3">
-                        <label htmlFor="blood_pressure" className="relative">
-                          ความดันโลหิต (มม.ปรอท)
-                          <span className="text-red-500 absolute">*</span>
-                        </label>
-                        <input
-                          className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                          id="idBlood_pressure"
-                          name="blood_pressure"
-                          placeholder="ความดันโลหิต (มม.ปรอท)"
-                          onChange={handleChange}
-                          value={formData.blood_pressure}
-                        />
-                        {errors.blood_pressure && (
-                          <div className="text-red-500 text-sm mt-1">
-                            {errors.blood_pressure}
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-3">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="w-full">
-                            <label htmlFor="weight" className="relative">
-                              น้ำหนัก
-                              <span className="text-red-500 absolute">*</span>
-                            </label>
-                            <input
-                              className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                              id="idWeight"
-                              name="weight"
-                              placeholder="กิโลกรัม"
-                              onChange={handleChange}
-                              value={formData.weight}
-                            />
-                            {errors.weight && (
-                              <div className="text-red-500 text-sm mt-1">
-                                {errors.weight}
-                              </div>
-                            )}
-                          </div>
-                          <div className="items-start w-full">
-                            <label htmlFor="height" className="relative">
-                              ส่วนสูง
-                              <span className="text-red-500 absolute">*</span>
-                            </label>
-                            <input
-                              className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                              id="idHeight"
-                              name="height"
-                              placeholder="เซนติเมตร"
-                              onChange={handleChange}
-                              value={formData.height}
-                            />
-                            {errors.height && (
-                              <div className="text-red-500 text-sm mt-1">
-                                {errors.height}
-                              </div>
-                            )}
-                          </div>
+                    <div className="items-start w-full mt-3">
+                      <label htmlFor="blood_pressure" className="relative">
+                        ความดันโลหิต (มม.ปรอท)
+                        <span className="text-red-500 absolute">*</span>
+                      </label>
+                      <input
+                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                        id="idBlood_pressure"
+                        name="blood_pressure"
+                        placeholder="ความดันโลหิต (มม.ปรอท)"
+                        onChange={handleChange}
+                        value={formData.blood_pressure}
+                      />
+                      {errors.blood_pressure && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.blood_pressure}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="w-full">
+                          <label htmlFor="weight" className="relative">
+                            น้ำหนัก
+                            <span className="text-red-500 absolute">*</span>
+                          </label>
+                          <input
+                            className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                            id="idWeight"
+                            name="weight"
+                            placeholder="กิโลกรัม"
+                            onChange={handleChange}
+                            value={formData.weight}
+                          />
+                          {errors.weight && (
+                            <div className="text-red-500 text-sm mt-1">
+                              {errors.weight}
+                            </div>
+                          )}
+                        </div>
+                        <div className="items-start w-full">
+                          <label htmlFor="height" className="relative">
+                            ส่วนสูง
+                            <span className="text-red-500 absolute">*</span>
+                          </label>
+                          <input
+                            className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                            id="idHeight"
+                            name="height"
+                            placeholder="เซนติเมตร"
+                            onChange={handleChange}
+                            value={formData.height}
+                          />
+                          {errors.height && (
+                            <div className="text-red-500 text-sm mt-1">
+                              {errors.height}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="w-full mt-3">
-                        <label htmlFor="waistline" className="relative">
-                          รอบเอว (นิ้ว)
-                          <span className="text-red-500 absolute">*</span>
-                        </label>
-                        <input
-                          className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                          id="idWaistline"
-                          name="waistline"
-                          placeholder="รอบเอว"
-                          onChange={handleChange}
-                          value={formData.waistline}
-                        />
-                        {errors.waistline && (
-                          <div className="text-red-500 text-sm mt-1">
-                            {errors.waistline}
-                          </div>
-                        )}
-                      </div>
+                    </div>
+                    <div className="w-full mt-3">
+                      <label htmlFor="waistline" className="relative">
+                        รอบเอว (นิ้ว)
+                        <span className="text-red-500 absolute">*</span>
+                      </label>
+                      <input
+                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                        id="idWaistline"
+                        name="waistline"
+                        placeholder="รอบเอว"
+                        onChange={handleChange}
+                        value={formData.waistline}
+                      />
+                      {errors.waistline && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.waistline}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Typography>
               </AccordionDetails>

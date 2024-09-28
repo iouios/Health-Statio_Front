@@ -6,7 +6,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { List, useMediaQuery, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import icon from "../../../assets/icon.png";
 import * as Yup from "yup";
 import axios from "axios";
@@ -243,6 +243,14 @@ const PersonalRecordData: React.FC = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
+
   return (
     <div className="h-screen">
       <Navbar />
@@ -275,11 +283,12 @@ const PersonalRecordData: React.FC = () => {
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <Link to="/">
-                <button className="rounded-lg p-2 text-left w-full">
-                  อสม ออกจากระบบ
-                </button>
-              </Link>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg p-2 text-left w-full text-black"
+              >
+                ออกจากระบบ
+              </button>
             </List>
           )}
         </div>

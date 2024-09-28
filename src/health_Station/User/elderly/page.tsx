@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import {
   List,
@@ -49,28 +49,28 @@ const Elderly: React.FC = () => {
 
   const fistelderly = async () => {
     await axios
-        .get(`http://localhost:9999/api/users/getCaregiven`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.caregiven);
-          setTotalCount(response.data.totalCaregiven);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-  }
+      .get(`http://localhost:9999/api/users/getCaregiven`, {
+        params: {
+          page: page,
+          limit: itemsPerPage,
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setData(response.data.caregiven);
+        setTotalCount(response.data.totalCaregiven);
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+      });
+  };
 
-  useEffect( () => {
+  useEffect(() => {
     if (!searchQuery.trim()) {
-      fistelderly()
+      fistelderly();
     }
   }, [page, itemsPerPage]);
 
@@ -79,12 +79,15 @@ const Elderly: React.FC = () => {
 
     if (searchQuery.trim()) {
       axios
-        .get(`http://localhost:9999/api/users/getcaregivenBySSD/${searchQuery}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
+        .get(
+          `http://localhost:9999/api/users/getcaregivenBySSD/${searchQuery}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((response) => {
           setData(response.data);
           setTotalCount(response.data.length);
@@ -133,6 +136,14 @@ const Elderly: React.FC = () => {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
+
   return (
     <div className="h-screen">
       <Navbar />
@@ -156,7 +167,7 @@ const Elderly: React.FC = () => {
                           บันทึกข้อมูลใหม่
                         </button>
                       </Link>
-                      <Link to="">
+                      <Link to="/health_Station/elderly">
                         <button className="rounded-lg p-2 text-left w-full">
                           บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
                         </button>
@@ -165,11 +176,12 @@ const Elderly: React.FC = () => {
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <Link to="/">
-                <button className="rounded-lg p-2 text-left w-full">
-                  อสม ออกจากระบบ
-                </button>
-              </Link>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg p-2 text-left w-full text-black"
+              >
+                ออกจากระบบ
+              </button>
             </List>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,54 +9,112 @@ import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import { Link } from "react-router-dom";
-import other from "../../assets/other.png";
-import AdminNavbar from "../../components/navbarAdmin/adminNavbar";
+import Navbar from "../../components/Navbar";
 import {
   List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   useMediaQuery,
   useTheme,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+  Button,
 } from "@mui/material";
+import axios from "axios";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Typography from "@mui/material/Typography";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import AdminNavbar from "../../components/navbarAdmin/adminNavbar";
+import AdminSidebar from "../../components/navbarAdmin/adminSidebar";
+import Dropdown from "@mui/joy/Dropdown";
 import Menu from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
-import MenuItem from "@mui/joy/MenuItem";
-import Dropdown from "@mui/joy/Dropdown";
-import healthHistoryTable from "./userfrom/healthHistoryTable";
-import caregiverInformation from "./userfrom/caregiverInformation";
-import citizenInformation from "./userfrom/citizenInformation";
-import AdminSidebar from "../../components/navbarAdmin/adminSidebar";
+import other from "../../assets/other.png"
 
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number,
-  form: string
-) {
-  return { name, calories, fat, carbs, protein, form };
+interface Data {
+  id: number;
+  ssd: number;
+  firstname: string;
+  lastname: string;
+  sex: string;
+  age: number;
+  phone: string;
 }
 
-interface ImageWithMenuProps {
-  imageSrc: string;
-  imageAlt: string;
-  menus: string[];
-}
-
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0, "iouios"),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3, "iouioZ"),
-  createData("Eclair", 262, 16.0, 24, 6.0, "zzzzz"),
-  createData("Cupcake", 305, 3.7, 67, 4.3, "Hello"),
-  createData("Gingerbread", 356, 16.0, 49, 3.9, "Test1"),
-];
-
-const ITEMS_PER_PAGE = 3;
-
-const Admin: React.FC = () => {
+const Health_Station: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [data, setData] = useState<Data[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      axios
+        .get(`http://localhost:9999/api/users/getUser`, {
+          params: {
+            page: page,
+            limit: itemsPerPage,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setData(response.data.allUser);
+          setTotalCount(response.data.totalAllUser);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+  }, [page, itemsPerPage]);
+
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (searchQuery.trim()) {
+      axios
+        .get(`http://localhost:9999/api/users/getusersBySSD/${searchQuery}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setData(response.data);
+          setTotalCount(response.data.length);
+          setPage(1);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    } else {
+      axios
+        .get(`http://localhost:9999/api/users/getUser`, {
+          params: {
+            page: page,
+            limit: itemsPerPage,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setData(response.data.allUser);
+          setTotalCount(response.data.totalAllUser);
+          setPage(1);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+  };
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -65,92 +123,94 @@ const Admin: React.FC = () => {
     setPage(value);
   };
 
-  const indexOfLastItem = page * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentRows = rows.slice(indexOfFirstItem, indexOfLastItem);
+  const handleItemsPerPageChange = (event: SelectChangeEvent<number>) => {
+    setItemsPerPage(Number(event.target.value));
+    setPage(1);
+  };
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="h-screen">
       <AdminNavbar />
       <div className="flex">
         <div className="flex-1 ">
-          <AdminSidebar/>
+          <AdminSidebar />
         </div>
         <div className=" bg-neutral-100 w-full">
-          <div className="flex-initial md:bg-white"></div>
-          <div className="flex-1 md:bg-neutral-100 ">
-            <div className=" md:bg-white md:m-4 p-2 bg-white rounded-lg">
-              <div className="text-center rounded-md">
-                <div className="grid grid-cols-2 md:flex-row md:items-center md:justify-between gap-5 ">
-                  <div className="text-left p-2 pr-4 md:p-4 text-2xl font-bold ">
-                    Search
-                  </div>
-                  <div className=" text-white md:ml-96">
-                    <Link to="/Admin/formAdmin" className="your-link-class">
-                      <button className="border-2 rounded-lg p-2 bg-blue-900 w-full">
-                        + ข้อมูลผู้ดูแล
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-                <div className="p-0 md:pl-4 md:pb-4">
-                  <form className="flex">
-                    <div className="flex flex-col items-start w-full mr-4 p-2">
-                      <label htmlFor="searchInput">เลขบัตรประชาชน</label>
-                      <input
-                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                        id="searchInput"
-                        name="searchInput"
-                        placeholder="Search"
-                      />
-                    </div>
-                    <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
-                      ค้นหา
-                    </button>
-                  </form>
+        <div className="flex-initial md:bg-white"></div>
+        <div className="flex-1 md:bg-neutral-100 ">
+          <div className=" md:bg-white md:m-4 p-2 bg-white rounded-lg">
+            <div className="text-center rounded-md">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 ">
+                <div className="text-left p-2 pr-4 md:p-4 text-2xl font-bold">
+                  Search
                 </div>
               </div>
+              <div className="p-0 md:pl-4 md:pb-4">
+                <form className="flex" onSubmit={handleSearch}>
+                  <div className="flex flex-col items-start w-full mr-4 p-2">
+                    <label htmlFor="searchInput">เลขบัตรประชาชน</label>
+                    <input
+                      className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                      id="searchInput"
+                      name="searchInput"
+                      placeholder="Search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
+                    ค้นหา
+                  </button>
+                </form>
+              </div>
             </div>
-            <div className=" bg-neutral-100 m-4">
-              <div className="bg-white rounded-lg">
-                <Paper className="w-full p-4">
-                  <h1 className="text-3xl font-bold text-nowrap mb-4">
-                    จัดการข้อมูลหลัก
-                  </h1>
-                  <TableContainer
-                    component={Paper}
-                    className="w-full overflow-auto"
-                  >
-                    <Table stickyHeader aria-label="sticky table">
-                      <TableHead className="w-full ">
-                        <TableRow>
-                          <TableCell align="left">ลำดับ</TableCell>
-                          <TableCell align="right">เลขบัตรประชาชน</TableCell>
-                          <TableCell align="right">ชื่อ-สกุล</TableCell>
-                          <TableCell align="right">เพศ</TableCell>
-                          <TableCell align="right">อายุ</TableCell>
-                          <TableCell align="right">หมายเลขโทรศัพท์</TableCell>
-                          <TableCell align="right"></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {currentRows.map((item, index) => (
-                          <TableRow
-                            key={index}
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell align="left">{item.name}</TableCell>
-                            <TableCell align="right">{item.calories}</TableCell>
-                            <TableCell align="right">{item.carbs}</TableCell>
-                            <TableCell align="right">{item.fat}</TableCell>
-                            <TableCell align="right">{item.protein}</TableCell>
-                            <TableCell align="right">012949148</TableCell>
-                            <TableCell align="right">
+          </div>
+          <div className=" bg-neutral-100 m-4">
+            <div className="bg-white rounded-lg">
+              <Paper className="w-full p-4 select-none">
+                <h1 className="text-3xl font-bold text-nowrap mb-4">
+                  จัดการข้อมูลหลัก
+                </h1>
+                <TableContainer
+                  component={Paper}
+                  className="w-full overflow-auto"
+                >
+                  <Table stickyHeader aria-label="sticky table">
+                    <TableHead className="w-full ">
+                      <TableRow>
+                        <TableCell align="left">ลำดับ</TableCell>
+                        <TableCell align="right">เลขบัตรประชาชน</TableCell>
+                        <TableCell align="right">ชื่อ</TableCell>
+                        <TableCell align="right">สกุล</TableCell>
+                        <TableCell align="right">เพศ</TableCell>
+                        <TableCell align="right">อายุ</TableCell>
+                        <TableCell align="right">หมายเลขโทรศัพท์</TableCell>
+                        <TableCell align="right"></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {data.map((item, index) => (
+                        <TableRow
+                          key={item.id}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }}
+                        >
+                          <TableCell align="left">
+                            {index + 1 + (page - 1) * itemsPerPage}
+                          </TableCell>
+                          <TableCell align="right">{item.ssd}</TableCell>
+                          <TableCell align="right">{item.firstname}</TableCell>
+                          <TableCell align="right">{item.lastname}</TableCell>
+                          <TableCell align="right">{item.sex}</TableCell>
+                          <TableCell align="right">{item.age}</TableCell>
+                          <TableCell align="right">{item.phone}</TableCell>
+                          <TableCell align="right">
                               <div className="">
                                 <div>
                                   <Dropdown>
@@ -164,7 +224,7 @@ const Admin: React.FC = () => {
                                     <Menu>
                                       <MenuItem>
                                         <Link
-                                          to="/admin/userfrom/caregiverInformation"
+                                          to={`/admin/userfrom/caregiver/${item.id}`}
                                           className="your-link-class"
                                         >
                                           <button className="">
@@ -174,7 +234,8 @@ const Admin: React.FC = () => {
                                       </MenuItem>
                                       <MenuItem>
                                       <Link
-                                          to="/admin/userfrom/citizenInformation"
+                                      to={`/admin/userfrom/citizenInformation/${item.id}`}
+                                          
                                           className="your-link-class"
                                         >
                                           <button className="">
@@ -183,11 +244,22 @@ const Admin: React.FC = () => {
                                         </Link></MenuItem>
                                       <MenuItem>
                                       <Link
-                                          to="/admin/userfrom/healthHistoryTable"
+                                      to={`/admin/userfrom/healthHistoryTable/${item.id}`}
+                                          
                                           className="your-link-class"
                                         >
                                           <button className="w-full">
                                           ข้อมูลประชาชน
+                                          </button>
+                                        </Link></MenuItem>
+                                        <MenuItem>
+                                      <Link
+                                      to={`/admin/userfrom/adldatahistorytable/${item.id}`}
+                                          
+                                          className="your-link-class"
+                                        >
+                                          <button className="w-full">
+                                          ข้อมูล ADL
                                           </button>
                                         </Link></MenuItem>
                                     </Menu>
@@ -195,31 +267,50 @@ const Admin: React.FC = () => {
                                 </div>
                               </div>
                             </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-                <Stack spacing={2} className="mt-4 p-2 items-end">
-                  <Pagination
-                    count={Math.ceil(rows.length / ITEMS_PER_PAGE)}
-                    page={page}
-                    onChange={handleChangePage}
-                    color="primary"
-                    variant="outlined"
-                    shape="rounded"
-                    showFirstButton
-                    showLastButton
-                  />
-                </Stack>
-              </div>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <div className="flex justify-between m-4">
+                  <div>
+                    <FormControl variant="outlined" size="small">
+                      <Select
+                        labelId="items-per-page-label"
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                      >
+                        <MenuItem value={5}>5</MenuItem>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={15}>15</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div className="">
+                    <Stack spacing={2}>
+                      <Pagination
+                        className="pl-4"
+                        count={totalPages}
+                        page={page}
+                        onChange={handleChangePage}
+                        color="primary"
+                        variant="outlined"
+                        shape="rounded"
+                        showFirstButton
+                        showLastButton
+                      />
+                    </Stack>
+                  </div>
+                </div>
+              </Paper>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
 };
 
-export default Admin;
+export default Health_Station;

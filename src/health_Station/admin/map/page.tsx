@@ -4,6 +4,7 @@ import AdminNavbar from "../../../components/navbarAdmin/adminNavbar";
 import AdminSidebar from "../../../components/navbarAdmin/adminSidebar";
 import { Link } from "react-router-dom";
 import icon from "../../../assets/icon.png";
+import ChiangMuanMap from "../../../components/map";
 
 const Map: React.FC = () => {
   const [state, setState] = useState();
@@ -24,18 +25,12 @@ const Map: React.FC = () => {
               <div className="text-center rounded-md">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 ">
                 <div className="flex p-4 ">
-                <Link to="/admin">
-                  <button className="mr-2 ">
-                    <img
-                      src={icon}
-                      alt="icon"
-                      className="object-cover h-3 mt-3 mr-1 md:place-items-start"
-                    />
-                  </button>
-                </Link>
                 <div className="text-2xl">แผนที่แสดงจุด</div>
               </div>
                 </div>
+                <div>
+              <ChiangMuanMap />
+              </div>
               </div>
             </div>
           </div>
