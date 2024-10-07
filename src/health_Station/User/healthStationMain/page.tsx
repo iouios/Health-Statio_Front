@@ -145,12 +145,19 @@ const Health_Station: React.FC = () => {
 
     // Filter based on the searchQuerys
     if (searchQuerys.trim()) {
-      filtered = filtered.filter((item) => 
-        item.firstname.toLowerCase().includes(searchQuerys.toLowerCase()) ||
-        item.lastname.toLowerCase().includes(searchQuerys.toLowerCase()) ||
-        item.phone.includes(searchQuerys) // You can add more fields to search
-      );
+      filtered = filtered.filter((item) => {
+        const searchLower = searchQuerys.toLowerCase();
+        return (
+          item.firstname.toLowerCase().includes(searchLower) ||
+          item.lastname.toLowerCase().includes(searchLower) ||
+          (item.ssd && item.ssd.toString().toLowerCase().includes(searchLower)) ||
+          (item.age && item.age.toString().includes(searchLower)) ||
+          item.sex.toLowerCase().includes(searchLower) ||
+          (item.phone && item.phone.includes(searchQuerys)) // Ensure phone is a string
+        );
+      });
     }
+    
 
     return filtered;
   };
