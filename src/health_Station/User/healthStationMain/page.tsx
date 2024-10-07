@@ -135,65 +135,71 @@ const Health_Station: React.FC = () => {
     navigate("/");
   };
 
-  const getFilteredData = (): Data[] => {
-    let filtered = finalResult; // Start with the complete final result
 
-    // Apply filter based on the filter state
-    if (filter === "ทั้งหมด") filtered = finalResult;
-    else if (filter === "สุขภาวะปกติ") filtered = resultsAllNormal;
-    else if (filter === "มีความพิการ") filtered = resultsallDisabled;
+const getFilteredData = (): Data[] => {
+  let filtered = finalResult; 
+  
 
-    // Filter based on the searchQuerys
-    if (searchQuerys.trim()) {
-      filtered = filtered.filter((item) => {
-        const searchLower = searchQuerys.toLowerCase();
-        return (
-          item.firstname.toLowerCase().includes(searchLower) ||
-          item.lastname.toLowerCase().includes(searchLower) ||
-          (item.ssd && item.ssd.toString().toLowerCase().includes(searchLower)) ||
-          (item.age && item.age.toString().includes(searchLower)) ||
-          item.sex.toLowerCase().includes(searchLower) ||
-          (item.phone && item.phone.includes(searchQuerys)) // Ensure phone is a string
-        );
-      });
-    }
-    
+  if (filter === "ทั้งหมด") filtered = finalResult;
+  else if (filter === "สุขภาวะปกติ") filtered = resultsAllNormal;
+  else if (filter === "มีความพิการ") filtered = resultsallDisabled;
 
-    return filtered;
-  };
 
-  const filteredData = getFilteredData();
+  if (searchQuerys.trim()) {
+    filtered = filtered.filter((item) => 
+      item.firstname.toLowerCase().includes(searchQuerys.toLowerCase()) ||  
+      item.lastname.toLowerCase().includes(searchQuerys.toLowerCase()) ||   
+      item.phone.includes(searchQuerys) ||  
+      item.sex.toString().includes(searchQuerys) ||                                 
+      item.ssd.toString().includes(searchQuerys) ||                         
+      item.age.toString().includes(searchQuerys)                            
+    );
+  }
 
-  const getTotalCount = () => {
-    if (filter === "ทั้งหมด") return totalAllUser;
-    if (filter === "สุขภาวะปกติ") return totalAllNormal;
-    if (filter === "มีความพิการ") return totalAllDisabled;
-    return totalAllUser;
-  };
+  return filtered;
+};
 
-  let getTotal = getTotalCount();
-  const [totalPage, setTotalPage] = useState<number>(1);
-  const [triggerChangeItemPerPage, setTriggerChangeItemPerPage] = useState<boolean>(false);
 
-  useEffect(() => {
-    let tempPage;
-    if (getTotal) {
-      setTriggerChangeItemPerPage(false);
-      tempPage = Math.ceil(getTotal / itemsPerPage);
-      setTotalPage(tempPage);
-    } else {
-      setTriggerChangeItemPerPage(false);
-      tempPage = Math.ceil(1 / itemsPerPage);
-      setTotalPage(tempPage);
-    }
-  }, [getTotal, triggerChangeItemPerPage]);
+const filteredData = getFilteredData();
 
-  const handleFilterChange = (value: string) => {
-    setFilter(value);
-    setPage(1);
-  };
+const getTotalCount = () => {
+  if (filter === "ทั้งหมด") return totalAllUser;
+  if (filter === "สุขภาวะปกติ") return totalAllNormal;
+  if (filter === "มีความพิการ") return totalAllDisabled;
+  return totalAllUser; 
+};
 
-  console.log(filteredData)
+
+let getTotal = getTotalCount();
+
+
+const [totalPage, setTotalPage] = useState<number>(1);
+const [triggerChangeItemPerPage, setTriggerChangeItemPerPage] = useState<boolean>(false);
+
+
+useEffect(() => {
+  let tempPage;
+  if (getTotal) {
+    setTriggerChangeItemPerPage(false);
+    tempPage = Math.ceil(getTotal / itemsPerPage); 
+    setTotalPage(tempPage);
+  } else {
+    setTriggerChangeItemPerPage(false);
+    tempPage = Math.ceil(1 / itemsPerPage); 
+    setTotalPage(tempPage);
+  }
+}, [getTotal, triggerChangeItemPerPage, itemsPerPage]); 
+
+
+const handleFilterChange = (value: string) => {
+  setFilter(value);  
+  setPage(1);        
+  setTriggerChangeItemPerPage(true);  
+};
+  // console.log(filteredData)
+  // console.log(getTotal)
+  // console.log(triggerChangeItemPerPage)
+  // console.log(totalPage)
 
   return (
     <div className="h-screen">

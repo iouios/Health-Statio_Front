@@ -6,7 +6,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { List, useMediaQuery, useTheme } from "@mui/material";
-import { Link, useNavigate,useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import icon from "../../../assets/icon.png";
 import * as Yup from "yup";
 import axios from "axios";
@@ -47,9 +47,11 @@ const Caregivens: React.FC = () => {
   const [errors, setErrors] = useState<Errors>({});
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate(); // <-- useNavigate hook
+  const [ssnError, setSsnError] = useState<string | null>(null);
+  const [isSsnError, setIsSsnError] = useState<boolean>(false);
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
-  const location = useLocation(); 
+  const location = useLocation();
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -65,7 +67,8 @@ const Caregivens: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
-
+      setSsnError(null);
+      setIsSsnError(false);
       const response = await axios.post(
         "http://localhost:9999/api/form/linkCaregiven",
         formData,
@@ -80,11 +83,12 @@ const Caregivens: React.FC = () => {
       if (response.status === 200) {
         console.log("Form Submitted", formData);
         setErrors({});
-        window.location.href = "/health_Station";// <-- Navigate to the desired route after form submission
+        window.location.href = "/health_Station"; // <-- Navigate to the desired route after form submission
       }
     } catch (error) {
+      setSsnError("ไม่มีข้อมูลผู้ใช้");
+      setIsSsnError(true);
       const newErrors: Errors = {};
-
       if (error instanceof Yup.ValidationError) {
         error.inner.forEach((err) => {
           if (err.path) newErrors[err.path as keyof Errors] = err.message;
@@ -121,7 +125,7 @@ const Caregivens: React.FC = () => {
       <Navbar />
       <div className="flex">
         <div className="flex-1 ">
-        {!isSmallScreen && (
+          {!isSmallScreen && (
             <List className="md:w-56">
               <Accordion className="bg-blue-500 m-2">
                 <AccordionSummary
@@ -239,6 +243,11 @@ const Caregivens: React.FC = () => {
                           onChange={handleChange}
                           value={formData.user_ssd}
                         />
+                        {isSsnError && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {ssnError}
+                          </div>
+                        )}
                         {errors.user_ssd && (
                           <div className="text-red-500 text-sm mt-1">
                             {errors.user_ssd}
@@ -258,6 +267,11 @@ const Caregivens: React.FC = () => {
                           onChange={handleChange}
                           value={formData.caregiven_ssd}
                         />
+                        {isSsnError && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {ssnError}
+                          </div>
+                        )}
                         {errors.caregiven_ssd && (
                           <div className="text-red-500 text-sm mt-1">
                             {errors.caregiven_ssd}

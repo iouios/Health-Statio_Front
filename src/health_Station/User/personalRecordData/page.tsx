@@ -180,7 +180,6 @@ const PersonalRecordData: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isActive = (path: string) => location.pathname === path;
   const location = useLocation(); 
-  // Handle Form Field Changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -228,7 +227,6 @@ const PersonalRecordData: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
-
       const response = await axios.post(
         "http://localhost:9999/api/form/userPersonal",
         formData,
@@ -246,9 +244,7 @@ const PersonalRecordData: React.FC = () => {
         window.location.href = "/health_Station";
       }
     } catch (error) {
-      
       const newErrors: Errors = {};
-
       if (error instanceof Yup.ValidationError) {
         error.inner.forEach((err) => {
           if (err.path) newErrors[err.path as keyof Errors] = err.message;

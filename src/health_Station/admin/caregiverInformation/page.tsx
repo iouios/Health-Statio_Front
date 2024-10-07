@@ -205,9 +205,15 @@ const Elderly: React.FC = () => {
                   <h1 className="text-3xl font-bold text-nowrap mb-4">
                     จัดการข้อมูลผู้ดูแล
                   </h1>
-                  <div className="p-2 flex text-blue-500 pt-5 pb-5">
-                    ทั้งหมด
-                    <div className="pl-2">{totalCaregiven}</div>
+                  <div className="p-4">
+                  <button
+                        className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
+                      >
+                        <div className="flex text-blue-500">
+                          <div className="pl-4">ทั้งหมด</div>
+                          <div className="pl-4">{totalCaregiven}</div>
+                        </div>
+                      </button>
                   </div>
                   <TableContainer
                     component={Paper}

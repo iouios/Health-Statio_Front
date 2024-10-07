@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { Link, useNavigate,useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import {
   List,
@@ -60,7 +60,7 @@ const Elderly: React.FC = () => {
   const [searchQuerys, setSearchQuerys] = useState<string>("");
   const [finalResult, setFinalResult] = useState<Data[]>([]);
   const isActive = (path: string) => location.pathname === path;
-  const location = useLocation(); 
+  const location = useLocation();
 
   useEffect(() => {
     if (searchQuerys === "") {
@@ -254,10 +254,10 @@ const Elderly: React.FC = () => {
                 </div>
                 <div className="p-0 md:pl-4 md:pb-4">
                   <form className="flex" onSubmit={handleSearch}>
-                    <div className="flex flex-col items-start w-full mr-4 p-2">
-                      <label htmlFor="searchInput">เลขบัตรประชาชน</label>
+                    <div className="flex flex-col items-start w-full ">
+                      <label htmlFor="searchInput">ค้นหาประชาชน</label>
                       <input
-                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full rounded-tr-lg rounded-tl-lg"
                         id="searchInput"
                         name="searchInput"
                         placeholder="Search"
@@ -265,9 +265,9 @@ const Elderly: React.FC = () => {
                         onChange={(e) => setSearchQuerys(e.target.value)}
                       />
                     </div>
-                    <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
+                    {/* <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
                       ค้นหา
-                    </button>
+                    </button> */}
                   </form>
                 </div>
               </div>
@@ -278,9 +278,13 @@ const Elderly: React.FC = () => {
                   <h1 className="text-3xl font-bold text-nowrap mb-4">
                     จัดการข้อมูลผู้ดูแล
                   </h1>
-                  <div className="p-2 flex text-blue-500 pt-5 pb-5">
-                    ทั้งหมด
-                    <div className="pl-2">{totalCaregiven}</div>
+                  <div className="p-4">
+                    <button className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4">
+                      <div className="flex text-blue-500">
+                        <div className="pl-4">ทั้งหมด</div>
+                        <div className="pl-4">{totalCaregiven}</div>
+                      </div>
+                    </button>
                   </div>
                   <TableContainer
                     component={Paper}

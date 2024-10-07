@@ -532,6 +532,11 @@ const HealthRecordForm: React.FC = () => {
                 {isSsnError && (
                   <div className="text-red-500 text-sm mt-1">{ssnError}</div>
                 )}
+                {errors.ssd && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {errors.ssd}
+                  </div>
+                )}
               </div>
               <div className="items-start w-full p-2">
                 <label htmlFor="physical_body_types" className="relative">

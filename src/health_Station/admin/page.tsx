@@ -8,7 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import {
   List,
@@ -33,6 +32,7 @@ import Dropdown from "@mui/joy/Dropdown";
 import Menu from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
 import other from "../../assets/other.png"
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 interface Data {
   id: number;
@@ -49,142 +49,76 @@ interface DashboardPerson {
   disability: number;
 }
 
+interface ApiResponse {
+  totalAllUser: number;
+  totalAllDisabled: number;
+  totalAllNormal: number;
+}
+
 
 const Admin: React.FC = () => {
-  const [page, setPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [page, setPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [data, setData] = useState<Data[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Not used, can be removed
   const [error, setError] = useState<string | null>(null);
-  const [dashboardPerson, setDashboardPerson] = useState<DashboardPerson | null>(null);
   const [searchQuerys, setSearchQuerys] = useState<string>("");
   const [finalResult, setFinalResult] = useState<Data[]>([]);
+  const [resultsallDisabled, setResultsAllDisabled] = useState<Data[]>([]);
+  const [resultsAllNormal, setResultsAllNormal] = useState<Data[]>([]);
+  const [totalAllUser, setTotalAllUser] = useState<number | null>(null);
+  const [totalAllDisabled, setTotalAllDisabled] = useState<number | null>(null);
+  const [totalAllNormal, setTotalAllNormal] = useState<number | null>(null);
+  const [filter, setFilter] = useState<string>("ทั้งหมด");
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation(); 
 
   useEffect(() => {
-    if (searchQuerys === "") {
-      setFinalResult(data);
-    } else {
-      const filteredQuery = data.filter((datas) => {
-        return Object.values(datas).some((value) =>
-          value.toString().toLowerCase().includes(searchQuerys.toLowerCase())
-        );
+    if (!searchQuery.trim()) {
+      axios
+        .get(`http://localhost:9999/api/users/getUser`, {
+          params: {
+            page: page,
+            limit: itemsPerPage,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setFinalResult(response.data.allUser);
+          setResultsAllDisabled(response.data.allDisabled);
+          setResultsAllNormal(response.data.allNormal);
+          setError(null);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+          setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
+        });
+    }
+  }, [page, itemsPerPage, searchQuery]);
+
+  useEffect(() => {
+    axios
+      .get<ApiResponse>(`http://localhost:9999/api/users/getUser`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setTotalAllUser(response.data.totalAllUser);
+        setTotalAllNormal(response.data.totalAllNormal);
+        setTotalAllDisabled(response.data.totalAllDisabled);
+      })
+      .catch((error) => {
+        setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
       });
-      setFinalResult(filteredQuery);
-    }
-  }, [searchQuerys, data]);
-  
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      axios
-        .get(`http://localhost:9999/api/users/getUser`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.allUser);
-          setTotalCount(response.data.totalAllUser);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-  }, [page, itemsPerPage]);
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      axios
-        .get(`http://localhost:9999/api/users/getUser`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.allUser);
-          setTotalCount(response.data.totalAllUser);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-  }, [page, itemsPerPage]);
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (searchQuery.trim()) {
-      axios
-        .get(`http://localhost:9999/api/users/getusersBySSD/${searchQuery}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data);
-          setTotalCount(response.data.length);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    } else {
-      axios
-        .get(`http://localhost:9999/api/users/getUser`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.allUser);
-          setTotalCount(response.data.totalAllUser);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-  };
-
-  const fetchData = async () => {
-    try {
-      const [personResponse] = await Promise.all([
-        axios.get(`http://localhost:9999/api/dashboard/dashboardPerson`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }),
-      ]);
-
-      setDashboardPerson(personResponse.data.userAll[0]); // Assuming the response contains an array 'userAll'
-    } catch (err) {
-      setError("Failed to load data");
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
   }, []);
 
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
+  const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
 
@@ -195,9 +129,74 @@ const Admin: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
+
+const getFilteredData = (): Data[] => {
+  let filtered = finalResult; 
+  
+
+  if (filter === "ทั้งหมด") filtered = finalResult;
+  else if (filter === "สุขภาวะปกติ") filtered = resultsAllNormal;
+  else if (filter === "มีความพิการ") filtered = resultsallDisabled;
+
+
+  if (searchQuerys.trim()) {
+    filtered = filtered.filter((item) => 
+      item.firstname.toLowerCase().includes(searchQuerys.toLowerCase()) ||  
+      item.lastname.toLowerCase().includes(searchQuerys.toLowerCase()) ||   
+      item.phone.includes(searchQuerys) ||  
+      item.sex.toString().includes(searchQuerys) ||                                 
+      item.ssd.toString().includes(searchQuerys) ||                         
+      item.age.toString().includes(searchQuerys)                            
+    );
+  }
+
+  return filtered;
+};
+
+
+const filteredData = getFilteredData();
+
+const getTotalCount = () => {
+  if (filter === "ทั้งหมด") return totalAllUser;
+  if (filter === "สุขภาวะปกติ") return totalAllNormal;
+  if (filter === "มีความพิการ") return totalAllDisabled;
+  return totalAllUser; 
+};
+
+
+let getTotal = getTotalCount();
+
+
+const [totalPage, setTotalPage] = useState<number>(1);
+const [triggerChangeItemPerPage, setTriggerChangeItemPerPage] = useState<boolean>(false);
+
+
+useEffect(() => {
+  let tempPage;
+  if (getTotal) {
+    setTriggerChangeItemPerPage(false);
+    tempPage = Math.ceil(getTotal / itemsPerPage); 
+    setTotalPage(tempPage);
+  } else {
+    setTriggerChangeItemPerPage(false);
+    tempPage = Math.ceil(1 / itemsPerPage); 
+    setTotalPage(tempPage);
+  }
+}, [getTotal, triggerChangeItemPerPage, itemsPerPage]); 
+
+
+const handleFilterChange = (value: string) => {
+  setFilter(value);  
+  setPage(1);        
+  setTriggerChangeItemPerPage(true);  
+};
   return (
     <div className="h-screen">
       <AdminNavbar />
@@ -216,7 +215,7 @@ const Admin: React.FC = () => {
                 </div>
               </div>
               <div className="p-0 md:pl-4 md:pb-4">
-                <form className="flex" onSubmit={handleSearch}>
+                <form className="flex">
                 <div className="flex flex-col items-start w-full ">
                       <label htmlFor="searchInput">ค้นหาประชาชน</label>
                       <input
@@ -242,28 +241,35 @@ const Admin: React.FC = () => {
                   จัดการข้อมูลหลัก
                 </h1>
                 <div>
-                    {dashboardPerson ? (
-                      <div className="flex pt-5 pb-5">
-                        <div className="p-2 flex text-blue-500">
-                          ทั้งหมด
-                          <div className="pl-2">{dashboardPerson.overall}</div>
+                <div className="flex p-4">
+                      <button
+                        onClick={() => handleFilterChange("ทั้งหมด")}
+                        className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
+                      >
+                        <div className="flex text-blue-500">
+                          <div className="pl-4">ทั้งหมด</div>
+                          <div className="pl-4">{totalAllUser}</div>
                         </div>
-                        <div className="p-2 flex text-blue-300">
-                          สุขภาวะปกติ
-                          <div className="pl-2">
-                            {dashboardPerson.normalHealth}
-                          </div>
+                      </button>
+                      <button
+                        onClick={() => handleFilterChange("สุขภาวะปกติ")}
+                        className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
+                      >
+                        <div className="flex text-blue-500">
+                          <div className="pl-4">สุขภาวะปกติ</div>
+                          <div className="pl-4">{totalAllNormal}</div>
                         </div>
-                        <div className="p-2 flex text-blue-300">
-                          มีความพิการ
-                          <div className="pl-2">
-                            {dashboardPerson.disability}
-                          </div>
+                      </button>
+                      <button
+                        onClick={() => handleFilterChange("มีความพิการ")}
+                        className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
+                      >
+                        <div className="flex text-blue-500">
+                          <div className="pl-4">มีความพิการ</div>
+                          <div className="pl-4">{totalAllDisabled}</div>
                         </div>
-                      </div>
-                    ) : (
-                      <p>ไม่มีข้อมูลของตารางประวัติข้อมูลสุขภาพ</p>
-                    )}
+                      </button>
+                    </div>
                   </div>
                 <TableContainer
                   component={Paper}
@@ -283,7 +289,7 @@ const Admin: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {finalResult.map((item, index) => (
+                      {filteredData.map((item, index) => (
                         <TableRow
                           key={item.id}
                           sx={{
@@ -380,7 +386,7 @@ const Admin: React.FC = () => {
                     <Stack spacing={2}>
                       <Pagination
                         className="pl-4"
-                        count={totalPages}
+                        count={totalPage}
                         page={page}
                         onChange={handleChangePage}
                         color="primary"

@@ -75,6 +75,8 @@ const PhysicalStandardValues: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isActive = (path: string) => location.pathname === path;
   const location = useLocation(); 
+  const [isSsnError, setIsSsnError] = useState<boolean>(false);
+  const [ssnError, setSsnError] = useState<string | null>(null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -92,6 +94,8 @@ const PhysicalStandardValues: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
+      setSsnError(null);
+      setIsSsnError(false);
       const response = await axios.post(
         "http://localhost:9999/api/form/healthDataRecords",
         formData,
@@ -108,6 +112,8 @@ const PhysicalStandardValues: React.FC = () => {
         window.location.href = "/health_Station";
       }
     } catch (error) {
+      setSsnError("ไม่มีข้อมูลผู้ใช้");
+      setIsSsnError(true);
       const newErrors: Errors = {};
       if (error instanceof Yup.ValidationError) {
         error.inner.forEach((err) => {
@@ -256,6 +262,9 @@ const PhysicalStandardValues: React.FC = () => {
                 onChange={handleChange}
                 value={formData.ssd}
               />
+              {isSsnError && (
+                  <div className="text-red-500 text-sm mt-1">{ssnError}</div>
+                )}
               {errors.ssd && (
                 <div className="text-red-500 text-sm mt-1">{errors.ssd}</div>
               )}

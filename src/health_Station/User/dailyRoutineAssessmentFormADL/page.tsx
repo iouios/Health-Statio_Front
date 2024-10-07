@@ -130,6 +130,8 @@ const PhysicalStandardValues: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
+      setSsnError(null);
+      setIsSsnError(false);
       const response = await axios.post(
         "http://localhost:9999/api/form/adl_Form",
         formData,
