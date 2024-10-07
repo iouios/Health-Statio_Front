@@ -43,6 +43,10 @@ interface Data {
   operating_area: string;
 }
 
+interface ApiResponse {
+  totalCaregiven: number;
+}
+
 const Elderly: React.FC = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -50,7 +54,50 @@ const Elderly: React.FC = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showInformation, setShowInformation] = useState<Data[]>([]);
-  
+  const [totalCaregiven, setTotalCaregiven] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuerys, setSearchQuerys] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<Data[]>([]);
+
+  useEffect(() => {
+    if (searchQuerys === "") {
+      setFinalResult(data);
+    } else {
+      const filteredQuery = data.filter((datas) => {
+        return Object.values(datas).some((value) =>
+          value.toString().toLowerCase().includes(searchQuerys.toLowerCase())
+        );
+      });
+      setFinalResult(filteredQuery);
+    }
+  }, [searchQuerys, data]);
+
+
+  console.log(data);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      axios
+        .get(`http://localhost:9999/api/users/getUser`, {
+          params: {
+            page: page,
+            limit: itemsPerPage,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setData(response.data.allUser);
+          setTotalCount(response.data.totalAllUser);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+  }, [page, itemsPerPage]);
 
   const fistelderly = async () => {
     await axios
@@ -79,50 +126,24 @@ const Elderly: React.FC = () => {
     }
   }, [page, itemsPerPage]);
 
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (searchQuery.trim()) {
-      axios
-        .get(
-          `http://localhost:9999/api/users/getcaregivenBySSD/${searchQuery}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-        .then((response) => {
-          setData(response.data);
-          setTotalCount(response.data.length);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    } else {
-      axios
-        .get(`http://localhost:9999/api/users/getCaregiven`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.caregiven);
-          setTotalCount(response.data.totalCaregiven);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-  };
+  useEffect(() => {
+    // เรียก API เมื่อ component ถูก mount
+    axios
+      .get<ApiResponse>(`http://localhost:9999/api/users/getCaregiven`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }) // ปรับ URL เป็นของคุณ
+      .then((response) => {
+        setTotalCaregiven(response.data.totalCaregiven); // บันทึกข้อมูล totalCaregiven ใน state
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
+        setLoading(false);
+      });
+  }, []);
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -159,21 +180,21 @@ const Elderly: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-0 md:pl-4 md:pb-4">
-                  <form className="flex" onSubmit={handleSearch}>
-                    <div className="flex flex-col items-start w-full mr-4 p-2">
-                      <label htmlFor="searchInput">เลขบัตรประชาชน</label>
+                  <form className="flex" >
+                  <div className="flex flex-col items-start w-full ">
+                      <label htmlFor="searchInput">ค้นหาประชาชน</label>
                       <input
-                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full rounded-tr-lg rounded-tl-lg"
                         id="searchInput"
                         name="searchInput"
                         placeholder="Search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={searchQuerys}
+                        onChange={(e) => setSearchQuerys(e.target.value)}
                       />
                     </div>
-                    <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
+                    {/* <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
                       ค้นหา
-                    </button>
+                    </button> */}
                   </form>
                 </div>
               </div>
@@ -184,6 +205,10 @@ const Elderly: React.FC = () => {
                   <h1 className="text-3xl font-bold text-nowrap mb-4">
                     จัดการข้อมูลผู้ดูแล
                   </h1>
+                  <div className="p-2 flex text-blue-500 pt-5 pb-5">
+                    ทั้งหมด
+                    <div className="pl-2">{totalCaregiven}</div>
+                  </div>
                   <TableContainer
                     component={Paper}
                     className="w-full overflow-auto"
@@ -204,7 +229,7 @@ const Elderly: React.FC = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {(data || []).map((item, index) => (
+                        {finalResult.map((item, index) => (
                           <TableRow
                             key={item.id}
                             sx={{
@@ -222,14 +247,12 @@ const Elderly: React.FC = () => {
                             <TableCell align="right">{item.sex}</TableCell>
                             <TableCell align="right">{item.age}</TableCell>
                             <TableCell align="right">{item.phone}</TableCell>
+                            <TableCell align="right">{item.caregiver}</TableCell>
+                            <TableCell align="right">{item.operating_area}</TableCell>
                             <TableCell align="right">
-                              {item.caregiver}
-                            </TableCell>
-                            <TableCell align="right">
-                              {item.operating_area}
-                            </TableCell>
-                            <TableCell align="right">
-                              <Link to={`/admin/userfrom/citizenInformation/showInformation/${item.id}`}>
+                              <Link
+                                to={`/admin/userfrom/citizenInformation/showInformation/${item.id}`}
+                              >
                                 <button>
                                   <img
                                     src={icon}

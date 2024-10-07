@@ -131,11 +131,11 @@ const Login: React.FC = () => {
                 </span>
               </label>
             </div> */}
-            <div className="md:w-full text-center bg-blue-500 rounded-full py-3 mt-28 grid justify-items-center">
-              <button onClick={handleLogin} className="text-white text-xl">
+
+              <button onClick={handleLogin} className="text-white text-xl md:w-full text-center bg-blue-500 rounded-full py-3 mt-28 grid justify-items-center">
                 Login
               </button>
-            </div>
+
             {errorMessage && (
               <div className="text-red-500 text-center mt-4">
                 {errorMessage}

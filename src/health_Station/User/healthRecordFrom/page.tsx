@@ -6,7 +6,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { List, useMediaQuery, useTheme } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import icon from "../../../assets/icon.png";
 import * as Yup from "yup";
 import {
@@ -19,6 +19,11 @@ import {
   Radio,
 } from "@mui/material";
 import axios from "axios";
+import userPlus from "../../../assets/userPlus.png";
+import Contacts from "../../../assets/Contacts.png";
+import Logout from "../../../assets/Logout.png";
+import userPlusBlue from "../../../assets/userPlusBlue.png";
+import ContactBlue from "../../../assets/ContactBlue.png";
 
 interface Input {
   id: number;
@@ -177,7 +182,10 @@ const HealthRecordForm: React.FC = () => {
   const [surgeryInputs, setSurgeryInputs] = useState<Input[]>([]);
   const [drugAllergyInputs, setDrugAllergyInputs] = useState<Input[]>([]);
   const [foodAllergyInputs, setFoodAllergyInputs] = useState<Input[]>([]);
-
+  const [ssnError, setSsnError] = useState<string | null>(null);
+  const [isSsnError, setIsSsnError] = useState<boolean>(false);
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation();
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -353,6 +361,8 @@ const HealthRecordForm: React.FC = () => {
       await validationSchema.validate(formDataToValidate, {
         abortEarly: false,
       });
+      setSsnError(null);
+      setIsSsnError(false);
       const response = await axios.post(
         "http://localhost:9999/api/form/healthDataForm",
         formDataToValidate,
@@ -363,13 +373,14 @@ const HealthRecordForm: React.FC = () => {
           },
         }
       );
-
       if (response.status === 200) {
         console.log("Form Submitted", formDataToValidate);
         setErrors({});
         window.location.href = "/health_Station";
       }
     } catch (error) {
+      setSsnError("ไม่มีข้อมูลผู้ใช้");
+      setIsSsnError(true);
       const newErrors: Errors = {};
 
       if (error instanceof Yup.ValidationError) {
@@ -403,9 +414,9 @@ const HealthRecordForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    
-    navigate('/');
+    localStorage.removeItem("token");
+
+    navigate("/");
   };
 
   return (
@@ -414,7 +425,7 @@ const HealthRecordForm: React.FC = () => {
       <div className="flex">
         <div className="flex-1 ">
           {!isSmallScreen && (
-            <List className="md:w-56 ">
+            <List className="md:w-56">
               <Accordion className="bg-blue-500 m-2">
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -427,25 +438,66 @@ const HealthRecordForm: React.FC = () => {
                   <Typography>
                     <div>
                       <Link to="/health_Station">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลใหม่
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station")
+                                ? userPlusBlue
+                                : userPlus
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">บันทึกข้อมูลใหม่</span>
                         </button>
                       </Link>
                       <Link to="/health_Station/elderly">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station/elderly")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station/elderly")
+                                ? ContactBlue
+                                : Contacts
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">
+                            บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                          </span>
                         </button>
                       </Link>
                     </div>
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <button
-          onClick={handleLogout}
-          className="rounded-lg p-2 text-left w-full text-black"
-        >
-          ออกจากระบบ
-        </button>
+              <div className="m-2">
+                <Accordion>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg p-2 text-left w-full grid grid-cols-2 text-red-500"
+                  >
+                    ออกจากระบบ
+                    <img
+                      src={Logout}
+                      alt="Logout"
+                      className="object-cover md:place-items-start mt-1 mr-1 justify-self-end"
+                    />
+                  </button>
+                </Accordion>
+              </div>
             </List>
           )}
         </div>
@@ -477,8 +529,8 @@ const HealthRecordForm: React.FC = () => {
                   onChange={handleChange}
                   value={formData.ssd}
                 />
-                {errors.ssd && (
-                  <div className="text-red-500 text-sm mt-1">{errors.ssd}</div>
+                {isSsnError && (
+                  <div className="text-red-500 text-sm mt-1">{ssnError}</div>
                 )}
               </div>
               <div className="items-start w-full p-2">

@@ -9,7 +9,13 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { List, useMediaQuery, useTheme } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
+import userPlus from "../../../assets/userPlus.png";
+import Contacts from "../../../assets/Contacts.png";
+import Logout from "../../../assets/Logout.png";
+import userPlusBlue from "../../../assets/userPlusBlue.png";
+import ContactBlue from "../../../assets/ContactBlue.png";
+
 interface FormData {
   ssd: string;
   firstname: string;
@@ -286,7 +292,8 @@ const Create: React.FC = () => {
 
   const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
-
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation(); 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -394,8 +401,8 @@ const Create: React.FC = () => {
       <Navbar />
       <div className="flex">
         <div className="flex-1 ">
-          {!isSmallScreen && (
-            <List className="md:w-56 ">
+        {!isSmallScreen && (
+            <List className="md:w-56">
               <Accordion className="bg-blue-500 m-2">
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -408,24 +415,66 @@ const Create: React.FC = () => {
                   <Typography>
                     <div>
                       <Link to="/health_Station">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลใหม่
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station")
+                                ? userPlusBlue
+                                : userPlus
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">บันทึกข้อมูลใหม่</span>
                         </button>
                       </Link>
                       <Link to="/health_Station/elderly">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station/elderly")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station/elderly")
+                                ? ContactBlue
+                                : Contacts
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">
+                            บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                          </span>
                         </button>
                       </Link>
                     </div>
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-                <button 
-                onClick={handleLogout}
-                className="rounded-lg p-2 text-left w-full">
-                  อสม ออกจากระบบ
-                </button>
+              <div className="m-2">
+                <Accordion>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg p-2 text-left w-full grid grid-cols-2 text-red-500"
+                  >
+                    ออกจากระบบ
+                    <img
+                      src={Logout}
+                      alt="Logout"
+                      className="object-cover md:place-items-start mt-1 mr-1 justify-self-end"
+                    />
+                  </button>
+                </Accordion>
+              </div>
             </List>
           )}
         </div>

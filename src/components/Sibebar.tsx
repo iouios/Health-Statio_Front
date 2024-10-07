@@ -9,17 +9,30 @@ import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import menu from "../assets/menu.png";
 import exit from "../assets/exit.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import userPlus from "../assets/userPlus.png";
+import Contacts from "../assets/Contacts.png";
+import userPlusBlue from "../assets/userPlusBlue.png";
+import ContactBlue from "../assets/ContactBlue.png";
 
 export default function TemporaryDrawer() {
   const [open, setOpen] = React.useState(false);
-
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation();
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
+
   const DrawerList = () => (
-    <div className="flex">
+    <div className="flex m-4">
       <Box sx={{ width: "auto" }} role="presentation" className="m-4">
         <div>
           <Accordion className="bg-blue-500 m-4">
@@ -33,19 +46,44 @@ export default function TemporaryDrawer() {
             <AccordionDetails>
               <Typography>
                 <div>
-                  <Link to="/Health_Station/HeaithRecordFrom">
-                    <button className="rounded-lg p-2 text-left w-full">
-                      บันทึกข้อมูลใหม่
+                  <Link to="/health_Station">
+                    <button
+                      className={`rounded-full p-2 text-left w-full flex items-center  ${
+                        isActive("/health_Station")
+                          ? "bg-blue-50 text-blue-600"
+                          : ""
+                      }`}
+                    >
+                      <img
+                        src={
+                          isActive("/health_Station") ? userPlusBlue : userPlus
+                        }
+                        alt="Chart"
+                        className="object-cover snap-center"
+                      />
+                      <span className="ml-2">บันทึกข้อมูลใหม่</span>
                     </button>
                   </Link>
-                  <Link to="">
-                    <button className="rounded-lg p-2 text-left w-full">
-                      บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
-                    </button>
-                  </Link>
-                  <Link to="/">
-                    <button className="rounded-lg p-2 text-left w-full">
-                      ออกจากระบบ
+                  <Link to="/health_Station/elderly">
+                    <button
+                      className={`rounded-full p-2 text-left w-full flex items-center  ${
+                        isActive("/health_Station/elderly")
+                          ? "bg-blue-50 text-blue-600"
+                          : ""
+                      }`}
+                    >
+                      <img
+                        src={
+                          isActive("/health_Station/elderly")
+                            ? ContactBlue
+                            : Contacts
+                        }
+                        alt="Chart"
+                        className="object-cover snap-center"
+                      />
+                      <span className="ml-2">
+                        บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                      </span>
                     </button>
                   </Link>
                 </div>

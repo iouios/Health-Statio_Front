@@ -43,13 +43,60 @@ interface Data {
   age: number;
   phone: string;
 }
+interface DashboardPerson {
+  overall: number;
+  normalHealth: number;
+  disability: number;
+}
 
-const Health_Station: React.FC = () => {
+
+const Admin: React.FC = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [data, setData] = useState<Data[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardPerson, setDashboardPerson] = useState<DashboardPerson | null>(null);
+  const [searchQuerys, setSearchQuerys] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<Data[]>([]);
+
+  useEffect(() => {
+    if (searchQuerys === "") {
+      setFinalResult(data);
+    } else {
+      const filteredQuery = data.filter((datas) => {
+        return Object.values(datas).some((value) =>
+          value.toString().toLowerCase().includes(searchQuerys.toLowerCase())
+        );
+      });
+      setFinalResult(filteredQuery);
+    }
+  }, [searchQuerys, data]);
+  
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      axios
+        .get(`http://localhost:9999/api/users/getUser`, {
+          params: {
+            page: page,
+            limit: itemsPerPage,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setData(response.data.allUser);
+          setTotalCount(response.data.totalAllUser);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+  }, [page, itemsPerPage]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -116,6 +163,24 @@ const Health_Station: React.FC = () => {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const [personResponse] = await Promise.all([
+        axios.get(`http://localhost:9999/api/dashboard/dashboardPerson`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }),
+      ]);
+
+      setDashboardPerson(personResponse.data.userAll[0]); // Assuming the response contains an array 'userAll'
+    } catch (err) {
+      setError("Failed to load data");
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -152,20 +217,20 @@ const Health_Station: React.FC = () => {
               </div>
               <div className="p-0 md:pl-4 md:pb-4">
                 <form className="flex" onSubmit={handleSearch}>
-                  <div className="flex flex-col items-start w-full mr-4 p-2">
-                    <label htmlFor="searchInput">เลขบัตรประชาชน</label>
-                    <input
-                      className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                      id="searchInput"
-                      name="searchInput"
-                      placeholder="Search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                  <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
+                <div className="flex flex-col items-start w-full ">
+                      <label htmlFor="searchInput">ค้นหาประชาชน</label>
+                      <input
+                        className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full rounded-tr-lg rounded-tl-lg"
+                        id="searchInput"
+                        name="searchInput"
+                        placeholder="Search"
+                        value={searchQuerys}
+                        onChange={(e) => setSearchQuerys(e.target.value)}
+                      />
+                    </div>
+                  {/* <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
                     ค้นหา
-                  </button>
+                  </button> */}
                 </form>
               </div>
             </div>
@@ -176,6 +241,30 @@ const Health_Station: React.FC = () => {
                 <h1 className="text-3xl font-bold text-nowrap mb-4">
                   จัดการข้อมูลหลัก
                 </h1>
+                <div>
+                    {dashboardPerson ? (
+                      <div className="flex pt-5 pb-5">
+                        <div className="p-2 flex text-blue-500">
+                          ทั้งหมด
+                          <div className="pl-2">{dashboardPerson.overall}</div>
+                        </div>
+                        <div className="p-2 flex text-blue-300">
+                          สุขภาวะปกติ
+                          <div className="pl-2">
+                            {dashboardPerson.normalHealth}
+                          </div>
+                        </div>
+                        <div className="p-2 flex text-blue-300">
+                          มีความพิการ
+                          <div className="pl-2">
+                            {dashboardPerson.disability}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p>ไม่มีข้อมูลของตารางประวัติข้อมูลสุขภาพ</p>
+                    )}
+                  </div>
                 <TableContainer
                   component={Paper}
                   className="w-full overflow-auto"
@@ -194,7 +283,7 @@ const Health_Station: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data.map((item, index) => (
+                      {finalResult.map((item, index) => (
                         <TableRow
                           key={item.id}
                           sx={{
@@ -313,4 +402,4 @@ const Health_Station: React.FC = () => {
   );
 };
 
-export default Health_Station;
+export default Admin;

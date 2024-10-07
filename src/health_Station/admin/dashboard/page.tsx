@@ -16,14 +16,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import Groups from "../../../assets/Groups.png";
+import Ear from "../../../assets/Ear.png";
+import Lifesavers from "../../../assets/Lifesavers.png";
+import Waiting from "../../../assets/Waiting.png";
+import Patient from "../../../assets/Patient.png";
+import Consulting from "../../../assets/Consulting.png";
+import Art from "../../../assets/Art.png";
+import Window from "../../../assets/Window.png";
 
 interface DashboardPerson {
   overall: number;
@@ -150,39 +150,39 @@ const Dashboard: React.FC = () => {
             <div className="text-center">
               {dashboardPerson ? (
                 <div className="grid grid-cols-4 p-6 gap-4 text-start">
-                  <div className="col-span-2  ">
+                  <div className="col-span-2  mt-2">
                     <div className="bg-blue-700 border-2 rounded-lg p-2 text-white">
-                    จำนวนประชากรทั้งหมด
-                    <div>{dashboardPerson.overall}</div>
+                      จำนวนประชากรทั้งหมด
+                      <div>{dashboardPerson.overall}</div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-2">
-                      <div className="border-2 rounded-lg p-2 bg-blue-300">
+                      <div className="border-2 rounded-lg p-2 bg-blue-100">
                         เพศชาย<div>{dashboardPerson.maleAll}</div>
                       </div>
-                      <div className="border-2 rounded-lg p-2 bg-green-200">
+                      <div className="border-2 rounded-lg p-2 bg-green-100">
                         เพศหญิง<div>{dashboardPerson.femaleAll}</div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-1">
-                    <div className="border-2 rounded-lg p-2 bg-blue-300">
+                  <div className="col-span-1 border-2 p-2 rounded-lg">
+                    <div className="border-2 rounded-lg p-2 bg-blue-100">
                       สุขภาวะปกติ<div>{dashboardPerson.normalHealth}</div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-2">
                       <div className="border-2 rounded-lg p-2 bg-yellow-100">
                         เพศชาย<div>{dashboardPerson.maleNormal}</div>
                       </div>
-                      <div className="border-2 rounded-lg p-2 bg-purple-200">
+                      <div className="border-2 rounded-lg p-2 bg-purple-100">
                         เพศหญิง<div>{dashboardPerson.femaleNormal}</div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-1">
-                    <div className="border-2 rounded-lg p-2 bg-blue-400">
+                  <div className="col-span-1 border-2 p-2 rounded-lg">
+                    <div className="border-2 rounded-lg p-2 bg-blue-100">
                       มีความพิการ<div>{dashboardPerson.disability}</div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-2">
-                      <div className="border-2 rounded-lg p-2 bg-red-200">
+                      <div className="border-2 rounded-lg p-2 bg-red-100">
                         เพศชาย<div>{dashboardPerson.maleDisability}</div>
                       </div>
                       <div className="border-2 rounded-lg p-2 bg-blue-100">
@@ -194,50 +194,122 @@ const Dashboard: React.FC = () => {
               ) : (
                 <p>ไม่มีข้อมูลของตารางประวัติข้อมูลสุขภาพ</p>
               )}
-              </div>
+            </div>
             <div>
-              {dashboardTypes && dashboardTypes? (
+              {dashboardTypes && dashboardTypes ? (
                 <div className="bg-neutral-50 rounded-lg">
-                  <div className="text-start pl-6">ประเภทของคนพิการ</div>
+                  <div className="text-start pl-6 text-2xl p-2">ประเภทของคนพิการ</div>
                   <div className="grid grid-cols-4 p-6 gap-4 text-start">
-                    <div className=" rounded-lg p-2  w-full ">
-                      <div>{dashboardTypes.visuallyImpaired}</div>
-                      <div>พิการทางการมองเห็น</div>
-                    </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>{dashboardTypes.PhysicallyDisabled}</div>
-                      <div>ทางการได้ยินและสื่อความหมาย</div>
-                    </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>
-                        {dashboardTypes.hearingAndCommunicationImpaired}
+                    <div className=" rounded-lg p-2  w-full flex ">
+                      <div className="pr-4">
+                        <img
+                          src={Groups}
+                          alt="Groups"
+                          className="object-cover rounded-full w-20 h-20 md:w-12 md:h-12 "
+                        />
                       </div>
-                      <div>ทางสติปัญญา</div>
-                    </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>
-                        {dashboardTypes.mentalAndBehavioralDisabilities}
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.visuallyImpaired}</div>
+                        <div className="text-neutral-400">พิการทางการมองเห็น</div>
                       </div>
-                      <div>ทางออทิสติค</div>
+                    </div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Ear}
+                          alt="Ear"
+                          className="object-cover rounded-full w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.PhysicallyDisabled}</div>
+                        <div className="text-neutral-400">ทางการได้ยินและสื่อความหมาย</div>
+                      </div>
+                    </div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Lifesavers}
+                          alt="Lifesavers"
+                          className="object-cover rounded-full w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div >
+                          {dashboardTypes.hearingAndCommunicationImpaired}
+                        </div>
+                        <div className="text-neutral-400">ทางสติปัญญา</div>
+                      </div>
+                    </div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Waiting}
+                          alt="Waiting"
+                          className="object-cover w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div >
+                          {dashboardTypes.mentalAndBehavioralDisabilities}
+                        </div>
+                        <div className="text-neutral-400">ทางออทิสติค</div>
+                      </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 p-6 gap-4 text-start">
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>{dashboardTypes.intellectuallyDisabled}</div>
-                      <div>ทางการเคลื่อนไหว</div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Patient}
+                          alt="Patient"
+                          className="object-cover w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.intellectuallyDisabled}</div>
+                        <div className="text-neutral-400">ทางการเคลื่อนไหว</div>
+                      </div>
                     </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>{dashboardTypes.learningDisabilities}</div>
-                      <div>ทางจิตใจและพฤติกรรม</div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Consulting}
+                          alt="Consulting"
+                          className="object-cover  w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.learningDisabilities}</div>
+                        <div className="text-neutral-400">ทางจิตใจและพฤติกรรม</div>
+                      </div>
                     </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>{dashboardTypes.autisticDisability}</div>
-                      <div>ทางการเรียนรู้</div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Art}
+                          alt="Art"
+                          className="object-cover  w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.autisticDisability}</div>
+                        <div className="text-neutral-400">ทางการเรียนรู้</div>
+                      </div>
                     </div>
-                    <div className=" rounded-lg p-2  w-full">
-                      <div>{dashboardTypes.moreThanOneTypeOfDisability}</div>
-                      <div>พิการมากกว่า 1 ประเภท</div>
+                    <div className=" rounded-lg p-2  w-full flex">
+                      <div className="pr-4">
+                        <img
+                          src={Window}
+                          alt="Window"
+                          className="object-cover  w-20 h-20 md:w-12 md:h-12"
+                        />
+                      </div>
+                      <div className="border-l-2 pl-2 border-neutral-500">
+                        <div>{dashboardTypes.moreThanOneTypeOfDisability}</div>
+                        <div className="text-neutral-400">พิการมากกว่า 1 ประเภท</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -247,55 +319,55 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
-              <div className="grid grid-cols-2 gap-4 p-2">
-                <div className="rounded-lg p-2  w-full text-start bg-neutral-50">
-                  จำนวนผู้พิการตามหมู่บ้าน
-                  <div style={{ width: "100%", height: 300 }}>
-                    {dashboardBarVillage ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={data}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <p>Loading data...</p>
-                    )}
-                  </div>
+            <div className="grid grid-cols-2 gap-4 p-2">
+              <div className="rounded-lg p-2  w-full text-start bg-neutral-50">
+                จำนวนผู้พิการตามหมู่บ้าน
+                <div style={{ width: "100%", height: 300 }}>
+                  {dashboardBarVillage ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={data}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="value" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p>Loading data...</p>
+                  )}
                 </div>
-                <div>
-                  <PieChart
-                    className="bg-neutral-50 p-2 rounded-lg "
-                    // series={[{data:dashboardVillage}]}
-                    series={[
-                      {
-                        data: dashboardVillage,
-                        innerRadius: 150,
-                        outerRadius: 80,
-                        paddingAngle: 0,
-                        cornerRadius: 5,
-                        startAngle: -180,
-                        endAngle: 225,
-                        cx: 200,
-                        cy: 180,
-                      },
-                    ]}
-                    width={600}
-                    height={350}
-                  />
-                </div>
+              </div>
+              <div>
+                <PieChart
+                  className="bg-neutral-50 p-2 rounded-lg "
+                  // series={[{data:dashboardVillage}]}
+                  series={[
+                    {
+                      data: dashboardVillage,
+                      innerRadius: 150,
+                      outerRadius: 80,
+                      paddingAngle: 0,
+                      cornerRadius: 5,
+                      startAngle: -180,
+                      endAngle: 225,
+                      cx: 200,
+                      cy: 180,
+                    },
+                  ]}
+                  width={600}
+                  height={350}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 

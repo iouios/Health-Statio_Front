@@ -6,10 +6,15 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { List, useMediaQuery, useTheme } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import icon from "../../../assets/icon.png";
 import * as Yup from "yup";
 import axios from "axios";
+import userPlus from "../../../assets/userPlus.png";
+import Contacts from "../../../assets/Contacts.png";
+import Logout from "../../../assets/Logout.png";
+import userPlusBlue from "../../../assets/userPlusBlue.png";
+import ContactBlue from "../../../assets/ContactBlue.png";
 
 interface FormData {
   type: string;
@@ -90,7 +95,7 @@ const validationSchema = Yup.object().shape({
   age: Yup.string().required("กรุณากรอกอายุ"),
 
   // รูปแบบวันที่ เช่น yyyy-mm-dd
-  birthday_date: Yup.date()
+  birthday_date: Yup.string()
     .typeError("กรุณากรอกวันเกิดในรูปแบบที่ถูกต้อง")
     .required("กรุณากรอกวันเกิด"),
 
@@ -122,6 +127,29 @@ const validationSchema = Yup.object().shape({
     .matches(/^\d{10}$/, "กรุณากรอกเป็นตัวเลขเท่านั้น,เบอร์โทรต้องมี 10 หลัก"),
 });
 
+// const validationSchema = Yup.object().shape({
+//   type: Yup.string().required("กรุณาเลือกประเภท"),
+//   ssd: Yup.string().required("กรุณากรอก เลขประจำตัวประชาชน"),
+//   ssdcaregiven: Yup.string().required("กรุณากรอก เลขประจำตัวประชาชน ของผู้ดูแล"),
+//   firstname: Yup.string().required("กรุณากรอกชื่อ"),
+//   lastname: Yup.string().required("กรุณากรอกนามสกุล"),
+//   sex: Yup.string().required("กรุณาเลือกเพศ"),
+//   education_level: Yup.string().required("กรุณาเลือกระดับการศึกษา"),
+//   career: Yup.string().required("กรุณากรอกอาชีพ"),
+//   age: Yup.string().required("กรุณากรอกอายุ"),
+//   birthday_date: Yup.string().required("กรุณากรอกวันเกิด"),
+//   blood_group: Yup.string().required("กรุณากรอกหมู่เลือด"),
+//   num_of_house: Yup.string().required("กรุณากรอกที่อยู่บ้านเลขที่"),
+//   group_of_house: Yup.string().required("กรุณากรอกหมู่ที่"),
+//   alley_of_house: Yup.string(),
+//   street_of_house: Yup.string(),
+//   tambon: Yup.string().required("กรุณากรอกตำบล"),
+//   amphoe: Yup.string().required("กรุณากรอกอำเภอ"),
+//   province: Yup.string().required("กรุณากรอกจังหวัด"),
+//   postcode: Yup.string()
+//     .required("กรุณากรอกรหัสไปรษณีย์")
+// });
+
 // คอมโพเนนต์หลัก
 const PersonalRecordData: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -146,11 +174,12 @@ const PersonalRecordData: React.FC = () => {
     postcode: "",
     phone: "",
   });
-
+  const [ssnError, setSsnError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation(); 
   // Handle Form Field Changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -199,6 +228,7 @@ const PersonalRecordData: React.FC = () => {
 
     try {
       await validationSchema.validate(formData, { abortEarly: false });
+
       const response = await axios.post(
         "http://localhost:9999/api/form/userPersonal",
         formData,
@@ -209,12 +239,14 @@ const PersonalRecordData: React.FC = () => {
           },
         }
       );
+
       if (response.status === 200) {
         console.log("Form Submitted", formData);
         setErrors({});
         window.location.href = "/health_Station";
       }
     } catch (error) {
+      
       const newErrors: Errors = {};
 
       if (error instanceof Yup.ValidationError) {
@@ -242,7 +274,6 @@ const PersonalRecordData: React.FC = () => {
       setErrors(newErrors);
     }
   };
-
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -256,8 +287,8 @@ const PersonalRecordData: React.FC = () => {
       <Navbar />
       <div className="flex">
         <div className="flex-1 ">
-          {!isSmallScreen && (
-            <List className="md:w-56 ">
+        {!isSmallScreen && (
+            <List className="md:w-56">
               <Accordion className="bg-blue-500 m-2">
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -270,25 +301,66 @@ const PersonalRecordData: React.FC = () => {
                   <Typography>
                     <div>
                       <Link to="/health_Station">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลใหม่
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station")
+                                ? userPlusBlue
+                                : userPlus
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">บันทึกข้อมูลใหม่</span>
                         </button>
                       </Link>
-                      <Link to="">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                      <Link to="/health_Station/elderly">
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station/elderly")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station/elderly")
+                                ? ContactBlue
+                                : Contacts
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">
+                            บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                          </span>
                         </button>
                       </Link>
                     </div>
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <button
-                onClick={handleLogout}
-                className="rounded-lg p-2 text-left w-full text-black"
-              >
-                ออกจากระบบ
-              </button>
+              <div className="m-2">
+                <Accordion>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg p-2 text-left w-full grid grid-cols-2 text-red-500"
+                  >
+                    ออกจากระบบ
+                    <img
+                      src={Logout}
+                      alt="Logout"
+                      className="object-cover md:place-items-start mt-1 mr-1 justify-self-end"
+                    />
+                  </button>
+                </Accordion>
+              </div>
             </List>
           )}
         </div>
@@ -362,7 +434,7 @@ const PersonalRecordData: React.FC = () => {
                         )}
                       </div>
                       <div className="items-start w-full mt-3">
-                        <label htmlFor="ssdcaregiven">
+                        <label htmlFor="ssdcaregiven" className="relative">
                           เลขประจำตัวประชาชนของผู้ดูแลผู้สูงอายุ
                         </label>
                         <input
@@ -461,14 +533,29 @@ const PersonalRecordData: React.FC = () => {
                             ระดับการศึกษา
                             <span className="text-red-500 absolute">*</span>
                           </label>
-                          <input
-                            className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                            id="ideducation_level"
+                          <select
                             name="education_level"
-                            placeholder="ระดับการศึกษา"
-                            value={formData.education_level}
+                            id="ideducation_level"
                             onChange={handleChange}
-                          />
+                            value={formData.education_level}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          >
+                            <option value="">ระดับการศึกษา</option>
+                            <option value="ต่ำกว่าประถมศึกษา">
+                              ต่ำกว่าประถมศึกษา
+                            </option>
+                            <option value="ประถมศึกษา">ประถมศึกษา</option>
+                            <option value="มัธยมศึกษา">มัธยมศึกษา</option>
+                            <option value="ประกาศนียบัตรวิชาชีพ ปวช/ปวส/ปวท">
+                              ประกาศนียบัตรวิชาชีพ ปวช/ปวส/ปวท
+                            </option>
+                            <option value="อนุปริญญา">อนุปริญญา</option>
+                            <option value="ปริญญาตรีหรือเทียบเท่า">
+                              ปริญญาตรีหรือเทียบเท่า
+                            </option>
+                            <option value="ปริญญาโท">ปริญญาโท</option>
+                            <option value="ปริญญาเอก">ปริญญาเอก</option>
+                          </select>
                           {errors.education_level && (
                             <div className="text-red-500 text-sm mt-1">
                               {errors.education_level}
@@ -476,7 +563,7 @@ const PersonalRecordData: React.FC = () => {
                           )}
                         </div>
                         <div className="items-start w-full">
-                          <label htmlFor="career" className="relative">
+                          <label htmlFor="idcareer" className="relative">
                             อาชีพ
                             <span className="text-red-500 absolute">*</span>
                           </label>
@@ -552,14 +639,48 @@ const PersonalRecordData: React.FC = () => {
                             หมู่ที่
                             <span className="text-red-500 absolute">*</span>
                           </label>
-                          <input
-                            className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                            id="idgroup_of_house"
+                          <select
                             name="group_of_house"
-                            placeholder="หมู่ที่"
-                            value={formData.group_of_house}
+                            id="idgroup_of_house"
                             onChange={handleChange}
-                          />
+                            value={formData.group_of_house}
+                            className="w-full p-2 border-gray-200 bg-gray-100 border-2 border-b-4"
+                          >
+                            <option value="">หมู่ที่</option>
+                            <option value="หมู่ที่ 1 บ้านหลวง">
+                              หมู่ที่ 1 บ้านหลวง
+                            </option>
+                            <option value="หมู่ที่ 2 บ้านแพทย์">
+                              หมู่ที่ 2 บ้านแพทย์
+                            </option>
+                            <option value="หมู่ที่ 3 บ้านปงสนุก">
+                              หมู่ที่ 3 บ้านปงสนุก
+                            </option>
+                            <option value="หมู่ที่ 4 บ้านปิน">
+                              หมู่ที่ 4 บ้านปิน
+                            </option>
+                            <option value="หมู่ที่ 5 บ้านไชยสถาน">
+                              หมู่ที่ 5 บ้านไชยสถาน
+                            </option>
+                            <option value="หมู่ที่ 6 บ้านท่าม่าน">
+                              หมู่ที่ 6 บ้านท่าม่าน
+                            </option>
+                            <option value="หมู่ที่ 7 บ้านหล่ายทุ่ง">
+                              หมู่ที่ 7 บ้านหล่ายทุ่ง
+                            </option>
+                            <option value="หมู่ที่ 8 บ้านสบทราย">
+                              หมู่ที่ 8 บ้านสบทราย
+                            </option>
+                            <option value="หมู่ที่ 9 บ้านใหม่">
+                              หมู่ที่ 9 บ้านใหม่
+                            </option>
+                            <option value="หมู่ที่ 10 บ้านกลาง">
+                              หมู่ที่ 10 บ้านกลาง
+                            </option>
+                            <option value="หมู่ที่ 11 บ้านป่าซางคำ">
+                              หมู่ที่ 11 บ้านป่าซางคำ
+                            </option>
+                          </select>
                           {errors.group_of_house && (
                             <div className="text-red-500 text-sm mt-1">
                               {errors.group_of_house}
@@ -614,7 +735,7 @@ const PersonalRecordData: React.FC = () => {
                           </label>
                           <input
                             className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                            id="amphoe"
+                            id="idamphoe"
                             name="amphoe"
                             placeholder="อำเภอ"
                             value={formData.amphoe}
@@ -665,26 +786,26 @@ const PersonalRecordData: React.FC = () => {
                           )}
                         </div>
                       </div>
-                    </form>
-                    <form className="grid grid-rows-1 grid-flow-col gap-4">
-                      <div className="items-start w-full pt-4">
-                        <label htmlFor="phone" className="relative">
-                          โทรศัพท์
-                          <span className="text-red-500 absolute">*</span>
-                        </label>
-                        <input
-                          className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                          id="idphone"
-                          name="phone"
-                          placeholder="โทรศัพท์"
-                          value={formData.phone}
-                          onChange={handleChange}
-                        />
-                        {errors.phone && (
-                          <div className="text-red-500 text-sm mt-1">
-                            {errors.phone}
-                          </div>
-                        )}
+                      <div className="grid grid-rows-1 grid-flow-col gap-4">
+                        <div className="items-start w-full pt-4">
+                          <label htmlFor="phone" className="relative">
+                            โทรศัพท์
+                            <span className="text-red-500 absolute">*</span>
+                          </label>
+                          <input
+                            className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
+                            id="idphone"
+                            name="phone"
+                            placeholder="โทรศัพท์"
+                            value={formData.phone}
+                            onChange={handleChange}
+                          />
+                          {errors.phone && (
+                            <div className="text-red-500 text-sm mt-1">
+                              {errors.phone}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </form>
                   </div>

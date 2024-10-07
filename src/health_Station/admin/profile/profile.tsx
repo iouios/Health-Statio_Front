@@ -47,8 +47,21 @@ const Profile: React.FC = () => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [editValue, setEditValue] = useState<ProfileData[] | null>(null);
   const [master, setMaster] = useState<boolean>(false);
-  const [isAvailable, setIsAvailable] = useState(false); // สถานะเริ่มต้นเป็นไม่พร้อมใช้งาน
+  const [searchQuerys, setSearchQuerys] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<Data[]>([]);
 
+  useEffect(() => {
+    if (searchQuerys === "") {
+      setFinalResult(data);
+    } else {
+      const filteredQuery = data.filter((datas) => {
+        return Object.values(datas).some((value) =>
+          value.toString().toLowerCase().includes(searchQuerys.toLowerCase())
+        );
+      });
+      setFinalResult(filteredQuery);
+    }
+  }, [searchQuerys, data]);
 
   const handleClick = (id: any) => {
     setUserId(id);
@@ -71,8 +84,7 @@ const Profile: React.FC = () => {
   };
 
   const handleConfirm = () => {
-    setIsAvailable(true); // เปลี่ยนสถานะเป็นพร้อมใช้งานเมื่อกดยืนยัน
-    setIsPopupOpen(false); // ปิด popup
+    setIsPopupOpen(false);
   };
 
   const allMaster = async () => {
@@ -123,10 +135,10 @@ const Profile: React.FC = () => {
             },
           }
         );
-        
+
         setStatus(response.data);
         setIsPopupOpen(false);
-        localStorage.setAvailable('isReady', true);
+        localStorage.setAvailable("isReady", true);
       } catch (err) {
         setError("Failed to load statusMaster");
       }
@@ -137,7 +149,6 @@ const Profile: React.FC = () => {
     e.preventDefault();
     if (editValue && editValue[0]) {
       try {
-        
         const response = await axios.put(
           `http://localhost:9999/api/users/editProfile/${userId}`,
           {
@@ -173,20 +184,11 @@ const Profile: React.FC = () => {
     setEditValue(profileData);
   }, [profileData]);
 
-  useEffect(() => {
-    if (profileData && profileData[0]?.statusmaster === "พร้อม") {
-      setIsAvailable(true);
-    } else {
-      setIsAvailable(false);
-    }
-  }, [profileData]);
-
-
   return (
     <div className="h-screen">
       <AdminNavbar />
       <div className="grid grid-cols-[1fr_4fr] gap-4">
-        <div className="">
+        <div className="flex">
           <AdminSidebar />
         </div>
         <div className="p-6">
@@ -202,32 +204,35 @@ const Profile: React.FC = () => {
                   </Link>
                 </div>
                 <div className="flex flex-col items-start w-full pt-2 pb-2">
+                  <label htmlFor="searchInput">เลขบัตรประชาชน</label>
                   <input
                     className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
                     id="searchInput"
                     name="searchInput"
                     placeholder="Search"
+                    value={searchQuerys}
+                    onChange={(e) => setSearchQuerys(e.target.value)}
                   />
                 </div>
                 <div>
                   <div className="overflow-auto h-72 ">
-                    {data.map((item, index) => (
+                    {finalResult.map((item, index) => (
                       <TableRow
                         key={item.id}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
                       >
-                        <div
+                        <button
                           onClick={() => handleClick(item.id)}
-                          className="m-2 bg-gray-200 w-44"
+                          className="m-2 bg-gray-200 w-44 text-start"
                         >
                           <div className="p-2">
                             {item.firstname}
                             {item.lastname}
                           </div>
                           <div className="pb-2 pl-2">{item.rolename}</div>
-                        </div>
+                        </button>
                       </TableRow>
                     ))}
                   </div>
@@ -445,8 +450,18 @@ const Profile: React.FC = () => {
                                           </TableCell>
                                           <TableCell>
                                             <div className="flex flex-col text-end">
-                                              <div>
-                                                {profileData[0].statusmaster}
+                                              <div
+                                                className={`${
+                                                  profileData?.[0]
+                                                    ?.statusmaster === "READY"
+                                                    ? "text-green-500"
+                                                    : "text-red-500"
+                                                }`}
+                                              >
+                                                {profileData?.[0]
+                                                  ?.statusmaster === "READY"
+                                                  ? "พร้อมใช้งาน"
+                                                  : "ไม่พร้อมใช้งาน"}
                                               </div>
                                               <div>
                                                 {profileData[0].username}
@@ -485,23 +500,12 @@ const Profile: React.FC = () => {
                 <div className="">
                   <div className="bg-white rounded-lg shadow-lg p-6 relative">
                     <div className="flex flex-col items-end justify-end">
-                      {!isAvailable ? (
-                        <button
-                          onClick={openPopup}
-                          className="px-4 py-2 bg-red-500 text-white rounded"
-                        >
-                          ไม่พร้อมใช้งาน
-                        </button>
-                        
-                      ) : (
-                        <button
-                          className="px-4 py-2 bg-green-500 text-white rounded"
-                          onClick={openPopup}
-                        >
-                          พร้อมใช้งาน
-                        </button>
-                      )}
-
+                      <button
+                        onClick={openPopup}
+                        className="bg-white text-blue-500 border border-blue-500 py-2 px-4 rounded-xl"
+                      >
+                        อัพเดทสถานะการใช้งาน
+                      </button>
                       {isPopupOpen && (
                         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
                           <div className="bg-white rounded-lg shadow-lg p-6  relative">
@@ -512,15 +516,23 @@ const Profile: React.FC = () => {
                                 className="max-w-full max-h-full"
                               />
                             </div>
-                            <h2 className="text-xl font-bold">
-                              ต้องการยืนยันผู้ใช้ไม่พร้อมใช้งาน
+                            <h2 className="text-xl font-bold p-4">
+                              ต้องการอัพเดตสถานะของผู้ใช้หรือไม่
                             </h2>
-                            <button onClick={closePopup} className="p-2">
-                              ยกเลิก
-                            </button>
-                            <button onClick={handleSubmits} className="p-2">
-                              ยืนยัน
-                            </button>
+                            <div className="flex justify-between">
+                              <button
+                                onClick={closePopup}
+                                className="p-2 bg-gray-200 rounded-lg"
+                              >
+                                ยกเลิก
+                              </button>
+                              <button
+                                onClick={handleSubmits}
+                                className="p-2 bg-blue-500 text-white rounded-lg"
+                              >
+                                ยืนยัน
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}

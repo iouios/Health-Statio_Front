@@ -7,7 +7,6 @@ import Test from "./health_Station/Test";
 import HealthCheckInformation from "./health_Station/User/physicalStandardValues/page";
 import Daily_routine_assessment_form_ADL from "./health_Station/User/dailyRoutineAssessmentFormADL/page";
 import Admin from "./health_Station/admin/page";
-import FormAdmin from "./health_Station/admin/fromAdmin/page";
 import HealthHistoryTable from "./health_Station/admin/userfrom/healthHistoryTable";
 import CitizenInformation from "./health_Station/admin/userfrom/citizenInformation";
 import AdminProflile from "../src/health_Station/admin/adminProfile/page";
@@ -21,11 +20,13 @@ import CaregiverInformation from "./health_Station/admin/caregiverInformation/pa
 import SavedHealthInformation from "./health_Station/admin/savedHealthInformation/page";
 import Map from "./health_Station/admin/map/page";
 import Dashboard from "./health_Station/admin/dashboard/page";
-import Caregiver from "./health_Station/admin/userfrom/caregiverInformation";
+import Caregivers from "./health_Station/admin/userfrom/caregiverInformation";
 import EditProfiles from "./health_Station/admin/profile/editProfile";
 import Elderly from "./health_Station/User/elderly/page";
 import Create from "./health_Station/User/elderly/create";
 import ShowInformation from "./health_Station/admin/caregiverInformation/showInformation";
+import Err from "./health_Station/pageErr/page";
+import Caregivens from "./health_Station/User/caregivens/page";
 const App: React.FC = () => {
   return (
     <Router>
@@ -40,14 +41,15 @@ const App: React.FC = () => {
           <Route path="/health_Station/dailyRoutineAssessmentFormADL" element={<Daily_routine_assessment_form_ADL />} />
           <Route path="/health_Station/elderly" element={<Elderly />} />
           <Route path="/health_Station/elderly/create" element={<Create />} />
-          <Route path="/test" element={<Test />} />
+          <Route path="/health_Station/User/caregivens" element={<Caregivens />} />
+          <Route path="/test" element={<Test  />} />
           
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/formAdmin" element={<FormAdmin />} />
-          <Route path="/admin/userfrom/healthHistoryTable" element={<HealthHistoryTable />} />
-          <Route path="/admin/userfrom/caregiverInformation" element={<CaregiverInformation />} />
-          <Route path="/admin/userfrom/citizenInformation" element={<CitizenInformation />} />
-          <Route path="/admin/userfrom/adldatahistorytable" element={<Adldatahistorytable />} />
+          <Route path="/admin/userfrom/caregiverInformation/careguvebFromId/:id" element={<CareguvebFromId />} />
+          <Route path="/admin/userfrom/healthHistoryTable/:hid" element={<HealthHistoryTable />} />
+          <Route path="/admin/userfrom/caregiverInformation/:id" element={<CaregiverInformation />} />
+          <Route path="/admin/userfrom/citizenInformation/:czid" element={<CitizenInformation />} />
+          <Route path="/admin/userfrom/adldatahistorytable/:aid" element={<Adldatahistorytable />} />
           <Route path="/admin/adminProflile" element={<AdminProflile />} />
           <Route path="/admin/Proflile" element={<Proflile />} />
           <Route path="/admin/Proflile/addUser" element={<AddUser />} />
@@ -58,11 +60,11 @@ const App: React.FC = () => {
           <Route path="/admin/savedHealthInformation" element={<SavedHealthInformation />} />
           <Route path="/admin/map" element={<Map />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/caregiver" element={<Caregiver />} />
+          <Route path="/admin/userfrom/caregiver/:cvid" element={<Caregivers />} />
           <Route path="/admin/Profile/editProfiles" element={<EditProfiles />} />
           <Route path="/admin/userfrom/citizenInformation/showInformation/:cid" element={<ShowInformation />} />
 
-          <Route path="*" element={<h1>404 Page Not Found</h1>} />
+          <Route path="*" element={<Err/>} />
         </Routes>
       </div>
     </Router>

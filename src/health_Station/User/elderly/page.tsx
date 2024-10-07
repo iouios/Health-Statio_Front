@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import {
   List,
@@ -27,6 +27,11 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import userPlus from "../../../assets/userPlus.png";
+import Contacts from "../../../assets/Contacts.png";
+import Logout from "../../../assets/Logout.png";
+import userPlusBlue from "../../../assets/userPlusBlue.png";
+import ContactBlue from "../../../assets/ContactBlue.png";
 
 interface Data {
   id: number;
@@ -40,12 +45,35 @@ interface Data {
   operating_area: string;
 }
 
+interface ApiResponse {
+  totalCaregiven: number;
+}
 const Elderly: React.FC = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [data, setData] = useState<Data[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [totalCaregiven, setTotalCaregiven] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuerys, setSearchQuerys] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<Data[]>([]);
+  const isActive = (path: string) => location.pathname === path;
+  const location = useLocation(); 
+
+  useEffect(() => {
+    if (searchQuerys === "") {
+      setFinalResult(data);
+    } else {
+      const filteredQuery = data.filter((datas) => {
+        return Object.values(datas).some((value) =>
+          value.toString().toLowerCase().includes(searchQuerys.toLowerCase())
+        );
+      });
+      setFinalResult(filteredQuery);
+    }
+  }, [searchQuerys, data]);
 
   const fistelderly = async () => {
     await axios
@@ -76,48 +104,26 @@ const Elderly: React.FC = () => {
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-
-    if (searchQuery.trim()) {
-      axios
-        .get(
-          `http://localhost:9999/api/users/getcaregivenBySSD/${searchQuery}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-        .then((response) => {
-          setData(response.data);
-          setTotalCount(response.data.length);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    } else {
-      axios
-        .get(`http://localhost:9999/api/users/getCaregiven`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.caregiven);
-          setTotalCount(response.data.totalCaregiven);
-          setPage(1);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
   };
+
+  useEffect(() => {
+    // เรียก API เมื่อ component ถูก mount
+    axios
+      .get<ApiResponse>(`http://localhost:9999/api/users/getCaregiven`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }) // ปรับ URL เป็นของคุณ
+      .then((response) => {
+        setTotalCaregiven(response.data.totalCaregiven); // บันทึกข้อมูล totalCaregiven ใน state
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError("เกิดข้อผิดพลาดในการดึงข้อมูล");
+        setLoading(false);
+      });
+  }, []);
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -150,7 +156,7 @@ const Elderly: React.FC = () => {
       <div className="flex">
         <div className="flex-1 ">
           {!isSmallScreen && (
-            <List className="md:w-56 ">
+            <List className="md:w-56">
               <Accordion className="bg-blue-500 m-2">
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -163,25 +169,66 @@ const Elderly: React.FC = () => {
                   <Typography>
                     <div>
                       <Link to="/health_Station">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลใหม่
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station")
+                                ? userPlusBlue
+                                : userPlus
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">บันทึกข้อมูลใหม่</span>
                         </button>
                       </Link>
                       <Link to="/health_Station/elderly">
-                        <button className="rounded-lg p-2 text-left w-full">
-                          บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                        <button
+                          className={`rounded-full p-2 text-left w-full flex items-center  ${
+                            isActive("/health_Station/elderly")
+                              ? "bg-blue-50 text-blue-600"
+                              : ""
+                          }`}
+                        >
+                          <img
+                            src={
+                              isActive("/health_Station/elderly")
+                                ? ContactBlue
+                                : Contacts
+                            }
+                            alt="Chart"
+                            className="object-cover snap-center"
+                          />
+                          <span className="ml-2">
+                            บันทึกข้อมูลผู้ดูแลผู้สูงอายุ
+                          </span>
                         </button>
                       </Link>
                     </div>
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-              <button
-                onClick={handleLogout}
-                className="rounded-lg p-2 text-left w-full text-black"
-              >
-                ออกจากระบบ
-              </button>
+              <div className="m-2">
+                <Accordion>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg p-2 text-left w-full grid grid-cols-2 text-red-500"
+                  >
+                    ออกจากระบบ
+                    <img
+                      src={Logout}
+                      alt="Logout"
+                      className="object-cover md:place-items-start mt-1 mr-1 justify-self-end"
+                    />
+                  </button>
+                </Accordion>
+              </div>
             </List>
           )}
         </div>
@@ -214,8 +261,8 @@ const Elderly: React.FC = () => {
                         id="searchInput"
                         name="searchInput"
                         placeholder="Search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={searchQuerys}
+                        onChange={(e) => setSearchQuerys(e.target.value)}
                       />
                     </div>
                     <button className="border-2 flex-none rounded-lg bg-blue-500 text-white p-2 md:w-36 mt-6">
@@ -231,6 +278,10 @@ const Elderly: React.FC = () => {
                   <h1 className="text-3xl font-bold text-nowrap mb-4">
                     จัดการข้อมูลผู้ดูแล
                   </h1>
+                  <div className="p-2 flex text-blue-500 pt-5 pb-5">
+                    ทั้งหมด
+                    <div className="pl-2">{totalCaregiven}</div>
+                  </div>
                   <TableContainer
                     component={Paper}
                     className="w-full overflow-auto"
@@ -250,7 +301,7 @@ const Elderly: React.FC = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {(data || []).map((item, index) => (
+                        {finalResult.map((item, index) => (
                           <TableRow
                             key={item.id}
                             sx={{
