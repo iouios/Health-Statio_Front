@@ -429,19 +429,7 @@ const PersonalRecordData: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      <div className="items-start w-full mt-3">
-                        <label htmlFor="ssdcaregiven" className="relative">
-                          เลขประจำตัวประชาชนของผู้ดูแลผู้สูงอายุ
-                        </label>
-                        <input
-                          className="border-2 border-b-4 flex-1 text-left p-2 bg-gray-100 w-full"
-                          id="idSsdcaregiven"
-                          name="ssdcaregiven"
-                          placeholder="เลขประจำตัวประชาชนของผู้ดูแลผู้สูงอายุ"
-                          onChange={handleChange}
-                          value={formData.ssdcaregiven}
-                        />
-                      </div>
+
                       <div className="flex flex-col md:flex-row md:space-x-4 mt-3">
                         <div className="w-full mb-4 md:mb-0">
                           <label htmlFor="firstname" className="relative">

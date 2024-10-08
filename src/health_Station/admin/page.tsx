@@ -163,10 +163,17 @@ const getFilteredData = (): Data[] => {
 
 const filteredData = getFilteredData();
 
+
+
 const getTotalCount = () => {
+  if (searchQuerys.trim()) {
+    return filteredData.length; 
+  }
+
   if (filter === "ทั้งหมด") return totalAllUser;
   if (filter === "สุขภาวะปกติ") return totalAllNormal;
   if (filter === "มีความพิการ") return totalAllDisabled;
+
   return totalAllUser; 
 };
 
@@ -189,14 +196,24 @@ useEffect(() => {
     tempPage = Math.ceil(1 / itemsPerPage); 
     setTotalPage(tempPage);
   }
-}, [getTotal, triggerChangeItemPerPage, itemsPerPage]); 
+}, [getTotal, triggerChangeItemPerPage, itemsPerPage]);
 
+
+useEffect(() => {
+  getTotal = getTotalCount();
+}, [filteredData, searchQuerys]); 
 
 const handleFilterChange = (value: string) => {
   setFilter(value);  
   setPage(1);        
   setTriggerChangeItemPerPage(true);  
+  setSearchQuerys('');
 };
+
+console.log(filteredData);
+console.log(finalResult);
+console.log(getTotal);
+
   return (
     <div className="h-screen">
       <AdminNavbar />
@@ -235,13 +252,14 @@ const handleFilterChange = (value: string) => {
             </div>
           </div>
           <div className=" bg-neutral-100 m-4">
-            <div className="bg-white rounded-lg">
-              <Paper className="w-full p-4 select-none">
-                <h1 className="text-3xl font-bold text-nowrap mb-4">
-                  จัดการข้อมูลหลัก
-                </h1>
-                <div>
-                <div className="flex p-4">
+              <div className="bg-white rounded-lg">
+                <Paper className="w-full p-4 select-none">
+                  <h1 className="text-3xl font-bold text-nowrap mb-4">
+                    จัดการข้อมูลหลัก
+                  </h1>
+                  <div>
+                    {/* ปุ่มสำหรับกรองข้อมูล */}
+                    <div className="flex p-4">
                       <button
                         onClick={() => handleFilterChange("ทั้งหมด")}
                         className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
@@ -270,137 +288,96 @@ const handleFilterChange = (value: string) => {
                         </div>
                       </button>
                     </div>
-                  </div>
-                <TableContainer
-                  component={Paper}
-                  className="w-full overflow-auto"
-                >
-                  <Table stickyHeader aria-label="sticky table">
-                    <TableHead className="w-full ">
-                      <TableRow>
-                        <TableCell align="left">ลำดับ</TableCell>
-                        <TableCell align="right">เลขบัตรประชาชน</TableCell>
-                        <TableCell align="right">ชื่อ</TableCell>
-                        <TableCell align="right">สกุล</TableCell>
-                        <TableCell align="right">เพศ</TableCell>
-                        <TableCell align="right">อายุ</TableCell>
-                        <TableCell align="right">หมายเลขโทรศัพท์</TableCell>
-                        <TableCell align="right"></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredData.map((item, index) => (
-                        <TableRow
-                          key={item.id}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell align="left">
-                            {index + 1 + (page - 1) * itemsPerPage}
-                          </TableCell>
-                          <TableCell align="right">{item.ssd}</TableCell>
-                          <TableCell align="right">{item.firstname}</TableCell>
-                          <TableCell align="right">{item.lastname}</TableCell>
-                          <TableCell align="right">{item.sex}</TableCell>
-                          <TableCell align="right">{item.age}</TableCell>
-                          <TableCell align="right">{item.phone}</TableCell>
-                          <TableCell align="right">
-                              <div className="">
-                                <div>
-                                  <Dropdown>
-                                    <MenuButton>
-                                      <img
-                                        src={other}
-                                        alt="other"
-                                        className=" w-2 h-2 md:w-4 md:h-4"
-                                      />
-                                    </MenuButton>
-                                    <Menu>
-                                      <MenuItem>
-                                        <Link
-                                          to={`/admin/userfrom/caregiver/${item.id}`}
-                                          className="your-link-class"
-                                        >
-                                          <button className="">
-                                          ประวัติข้อมูลสุขภาพ
-                                          </button>
-                                        </Link>
-                                      </MenuItem>
-                                      <MenuItem>
-                                      <Link
-                                      to={`/admin/userfrom/citizenInformation/${item.id}`}
-                                          
-                                          className="your-link-class"
-                                        >
-                                          <button className="">
-                                          ข้อมูลผู้ดูแล
-                                          </button>
-                                        </Link></MenuItem>
-                                      <MenuItem>
-                                      <Link
-                                      to={`/admin/userfrom/healthHistoryTable/${item.id}`}
-                                          
-                                          className="your-link-class"
-                                        >
-                                          <button className="w-full">
-                                          ข้อมูลประชาชน
-                                          </button>
-                                        </Link></MenuItem>
-                                        <MenuItem>
-                                      <Link
-                                      to={`/admin/userfrom/adldatahistorytable/${item.id}`}
-                                          
-                                          className="your-link-class"
-                                        >
-                                          <button className="w-full">
-                                          ข้อมูล ADL
-                                          </button>
-                                        </Link></MenuItem>
-                                    </Menu>
-                                  </Dropdown>
-                                </div>
-                              </div>
-                            </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <div className="flex justify-between m-4">
-                  <div>
-                    <FormControl variant="outlined" size="small">
-                      <Select
-                        labelId="items-per-page-label"
-                        value={itemsPerPage}
-                        onChange={handleItemsPerPageChange}
+
+                    {error && <div style={{ color: "red" }}>{error}</div>}
+
+                    <div className="p-2">
+                      <TableContainer
+                        component={Paper}
+                        className="w-full overflow-auto"
                       >
-                        <MenuItem value={5}>5</MenuItem>
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={15}>15</MenuItem>
-                        <MenuItem value={20}>20</MenuItem>
-                      </Select>
-                    </FormControl>
+                        <Table stickyHeader aria-label="sticky table">
+                          <TableHead className="w-full">
+                            <TableRow>
+                              <TableCell align="left">ลำดับ</TableCell>
+                              <TableCell align="right">
+                                เลขบัตรประชาชน
+                              </TableCell>
+                              <TableCell align="right">ชื่อ</TableCell>
+                              <TableCell align="right">สกุล</TableCell>
+                              <TableCell align="right">เพศ</TableCell>
+                              <TableCell align="right">อายุ</TableCell>
+                              <TableCell align="right">
+                                หมายเลขโทรศัพท์
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {filteredData.map((item, index) => (
+                              <TableRow
+                                key={item.id}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                }}
+                              >
+                                <TableCell align="left">
+                                  {index + 1 + (page - 1) * itemsPerPage}
+                                </TableCell>
+                                <TableCell align="right">{item.ssd}</TableCell>
+                                <TableCell align="right">
+                                  {item.firstname}
+                                </TableCell>
+                                <TableCell align="right">
+                                  {item.lastname}
+                                </TableCell>
+                                <TableCell align="right">{item.sex}</TableCell>
+                                <TableCell align="right">{item.age}</TableCell>
+                                <TableCell align="right">
+                                  {item.phone}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </div>
                   </div>
-                  <div className="">
-                    <Stack spacing={2}>
-                      <Pagination
-                        className="pl-4"
-                        count={totalPage}
-                        page={page}
-                        onChange={handleChangePage}
-                        color="primary"
-                        variant="outlined"
-                        shape="rounded"
-                        showFirstButton
-                        showLastButton
-                      />
-                    </Stack>
+                  <div className="flex justify-between m-4">
+                    <div>
+                      <FormControl variant="outlined" size="small">
+                        <Select
+                          labelId="items-per-page-label"
+                          value={itemsPerPage}
+                          onChange={handleItemsPerPageChange}
+                        >
+                          <MenuItem value={5}>5</MenuItem>
+                          <MenuItem value={10}>10</MenuItem>
+                          <MenuItem value={15}>15</MenuItem>
+                          <MenuItem value={20}>20</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    <div className="">
+                      <Stack spacing={2}>
+                        <Pagination
+                          className="pl-4"
+                          count={totalPage}
+                          page={page}
+                          onChange={handleChangePage}
+                          color="primary"
+                          variant="outlined"
+                          shape="rounded"
+                          showFirstButton
+                          showLastButton
+                        />
+                      </Stack>
+                    </div>
                   </div>
-                </div>
-              </Paper>
+                </Paper>
+              </div>
             </div>
-          </div>
         </div>
       </div>
       </div>

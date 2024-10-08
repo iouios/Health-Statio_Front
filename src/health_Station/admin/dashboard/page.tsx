@@ -133,6 +133,16 @@ const Dashboard: React.FC = () => {
     value: dashboardBarVillage?.values[index] || 0,
   }));
 
+  const gradientStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #1B2F63, #375FC9)',
+    height: '70px',
+    color: '#fff',
+    fontSize: '18px',
+    border: '2px solid #fff',  // equivalent of border-2
+    borderRadius: '0.5rem',    // equivalent of rounded-lg
+    padding: '0.5rem',         // equivalent of p-2
+  };
+
   return (
     <div className="h-screen">
       <AdminNavbar />
@@ -151,7 +161,7 @@ const Dashboard: React.FC = () => {
               {dashboardPerson ? (
                 <div className="grid grid-cols-4 p-6 gap-4 text-start">
                   <div className="col-span-2  mt-2">
-                    <div className="bg-blue-700 border-2 rounded-lg p-2 text-white">
+                    <div style={gradientStyle} >
                       จำนวนประชากรทั้งหมด
                       <div>{dashboardPerson.overall}</div>
                     </div>

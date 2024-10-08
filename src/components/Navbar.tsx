@@ -10,13 +10,15 @@ const Navbar: React.FC = () => {
       <div className="container flex justify-between items-center md:h-20">
         <div className="items-center flex">
           <div className="text-blue-600 text-right text-3xl font-bold md:block hidden flex-1 ml-20 w-96">
+            <div className="gradient-text">
             Health Station
+            </div>
           </div>
-          <div className="flex-1  ">
+          <div className="flex-1">
             <img
               src={heath}
               alt="Health"
-              className="object-cover rounded-full w-20 h-20 mt-5 ml-2 md:ml-0 md:mt-0 md:lg:w-12 md:lg:h-12 md:place-items-start"
+              className="object-cover rounded-full w-20 h-20 mt-5 ml-2 md:ml-0 md:mt-0 md:lg:w-16 md:lg:h-16 md:place-items-start"
             />
           </div>
         </div>

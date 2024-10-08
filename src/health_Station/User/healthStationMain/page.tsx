@@ -43,12 +43,6 @@ interface Data {
   phone: string;
 }
 
-interface DashboardPerson {
-  overall: number;
-  normalHealth: number;
-  disability: number;
-}
-
 interface ApiResponse {
   totalAllUser: number;
   totalAllDisabled: number;
@@ -162,10 +156,17 @@ const getFilteredData = (): Data[] => {
 
 const filteredData = getFilteredData();
 
+
+
 const getTotalCount = () => {
+  if (searchQuerys.trim()) {
+    return filteredData.length; 
+  }
+
   if (filter === "ทั้งหมด") return totalAllUser;
   if (filter === "สุขภาวะปกติ") return totalAllNormal;
   if (filter === "มีความพิการ") return totalAllDisabled;
+
   return totalAllUser; 
 };
 
@@ -188,15 +189,23 @@ useEffect(() => {
     tempPage = Math.ceil(1 / itemsPerPage); 
     setTotalPage(tempPage);
   }
-}, [getTotal, triggerChangeItemPerPage, itemsPerPage]); 
+}, [getTotal, triggerChangeItemPerPage, itemsPerPage]);
 
+
+useEffect(() => {
+  getTotal = getTotalCount();
+}, [filteredData, searchQuerys]); 
 
 const handleFilterChange = (value: string) => {
   setFilter(value);  
   setPage(1);        
   setTriggerChangeItemPerPage(true);  
+  setSearchQuerys('');
 };
-  // console.log(filteredData)
+
+console.log(filteredData);
+console.log(finalResult);
+console.log(getTotal);
   // console.log(getTotal)
   // console.log(triggerChangeItemPerPage)
   // console.log(totalPage)

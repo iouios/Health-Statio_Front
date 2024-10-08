@@ -53,7 +53,6 @@ const Elderly: React.FC = () => {
   const [data, setData] = useState<Data[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [showInformation, setShowInformation] = useState<Data[]>([]);
   const [totalCaregiven, setTotalCaregiven] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -72,32 +71,6 @@ const Elderly: React.FC = () => {
       setFinalResult(filteredQuery);
     }
   }, [searchQuerys, data]);
-
-
-  console.log(data);
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      axios
-        .get(`http://localhost:9999/api/users/getUser`, {
-          params: {
-            page: page,
-            limit: itemsPerPage,
-          },
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setData(response.data.allUser);
-          setTotalCount(response.data.totalAllUser);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-  }, [page, itemsPerPage]);
 
   const fistelderly = async () => {
     await axios
@@ -199,6 +172,9 @@ const Elderly: React.FC = () => {
                 </div>
               </div>
             </div>
+            <div className=" bg-neutral-100 w-full">
+          <div className="flex-initial md:bg-white"></div>
+          <div className="flex-1 md:bg-neutral-100 ">
             <div className=" bg-neutral-100 m-4">
               <div className="bg-white rounded-lg">
                 <Paper className="w-full p-4 select-none">
@@ -206,14 +182,12 @@ const Elderly: React.FC = () => {
                     จัดการข้อมูลผู้ดูแล
                   </h1>
                   <div className="p-4">
-                  <button
-                        className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4"
-                      >
-                        <div className="flex text-blue-500">
-                          <div className="pl-4">ทั้งหมด</div>
-                          <div className="pl-4">{totalCaregiven}</div>
-                        </div>
-                      </button>
+                    <button className="focus:outline-none focus:border-b-2 focus:border-blue-500 pr-4">
+                      <div className="flex text-blue-500">
+                        <div className="pl-4">ทั้งหมด</div>
+                        <div className="pl-4">{totalCaregiven}</div>
+                      </div>
+                    </button>
                   </div>
                   <TableContainer
                     component={Paper}
@@ -231,7 +205,6 @@ const Elderly: React.FC = () => {
                           <TableCell align="right">หมายเลขโทรศัพท์</TableCell>
                           <TableCell align="right">การอบรม Cg</TableCell>
                           <TableCell align="right">พื้นที่ปฎิบัติงาน</TableCell>
-                          <TableCell align="right"></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -253,20 +226,11 @@ const Elderly: React.FC = () => {
                             <TableCell align="right">{item.sex}</TableCell>
                             <TableCell align="right">{item.age}</TableCell>
                             <TableCell align="right">{item.phone}</TableCell>
-                            <TableCell align="right">{item.caregiver}</TableCell>
-                            <TableCell align="right">{item.operating_area}</TableCell>
                             <TableCell align="right">
-                              <Link
-                                to={`/admin/userfrom/citizenInformation/showInformation/${item.id}`}
-                              >
-                                <button>
-                                  <img
-                                    src={icon}
-                                    alt="icon"
-                                    className="object-cover md:place-items-start bg-auto hover:bg-contain rounded-lg rotate-180"
-                                  />
-                                </button>
-                              </Link>
+                              {item.caregiver}
+                            </TableCell>
+                            <TableCell align="right">
+                              {item.operating_area}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -307,6 +271,8 @@ const Elderly: React.FC = () => {
                 </Paper>
               </div>
             </div>
+          </div>
+        </div>
           </div>
         </div>
       </div>
